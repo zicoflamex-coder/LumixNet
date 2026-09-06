@@ -6,11 +6,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.v2ray.ang.R
 
@@ -69,23 +76,57 @@ fun HomeTabContent(
 }
 
 @Composable
-fun ToolsTabPlaceholder(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+private fun GlassRow(
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White.copy(alpha = 0.06f))
+            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("ابزارها به‌زودی اینجا میاد", color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
 
 @Composable
-fun SettingsTabPlaceholder(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("تنظیمات به‌زودی اینجا میاد", color = MaterialTheme.colorScheme.onBackground)
+fun ToolsTabContent(
+    onImportAction: (MainAction) -> Unit,
+    onMoreMenuAction: (MainMoreMenuAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+        item { GlassRow(stringResource(R.string.menu_item_import_config_qrcode)) { onImportAction(MainAction.ImportQRcode) } }
+        item { GlassRow(stringResource(R.string.menu_item_import_config_clipboard)) { onImportAction(MainAction.ImportClipboard) } }
+        item { GlassRow(stringResource(R.string.menu_item_import_config_local)) { onImportAction(MainAction.ImportConfigLocal) } }
+        items(MainMoreMenuAction.entries) { action ->
+            GlassRow(stringResource(action.labelRes)) { onMoreMenuAction(action) }
+        }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+    }
+}
+
+@Composable
+fun SettingsTabContent(
+    onNavigate: (MainDestination) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+        items(MainDestination.entries) { destination ->
+            GlassRow(stringResource(destination.labelRes)) { onNavigate(destination) }
+        }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
