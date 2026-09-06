@@ -1,14 +1,19 @@
 package com.v2ray.ang.ui.main
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.v2ray.ang.R
 
 enum class MainTab(val labelRes: Int, val iconRes: Int) {
@@ -23,19 +28,22 @@ fun MainBottomNav(
     selectedTab: MainTab,
     onTabSelect: (MainTab) -> Unit
 ) {
-    NavigationBar(
-        modifier = androidx.compose.ui.Modifier.background(
-            MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
-        ),
-        containerColor = androidx.compose.ui.graphics.Color.Transparent
-    ) {
-        MainTab.values().forEach { tab ->
-            NavigationBarItem(
-                selected = selectedTab == tab,
-                onClick = { onTabSelect(tab) },
-                icon = { Icon(painterResource(tab.iconRes), contentDescription = null) },
-                label = { Text(stringResource(tab.labelRes)) }
-            )
+    Column {
+        HorizontalDivider(color = Color.White.copy(alpha = 0.10f), thickness = 1.dp)
+        NavigationBar(
+            modifier = Modifier.background(
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)
+            ),
+            containerColor = Color.Transparent
+        ) {
+            MainTab.values().forEach { tab ->
+                NavigationBarItem(
+                    selected = selectedTab == tab,
+                    onClick = { onTabSelect(tab) },
+                    icon = { Icon(painterResource(tab.iconRes), contentDescription = null) },
+                    label = { Text(stringResource(tab.labelRes)) }
+                )
+            }
         }
     }
 }
