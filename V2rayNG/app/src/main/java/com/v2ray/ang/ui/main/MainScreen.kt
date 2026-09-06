@@ -52,6 +52,7 @@ fun MainScreen(
     val isDarkTheme = LocalDarkTheme.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var selectedTab by remember { mutableStateOf(MainTab.Home) }
     var showSearch by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showDelAllConfirm by remember { mutableStateOf(false) }
@@ -178,18 +179,26 @@ fun MainScreen(
                 )
             },
             bottomBar = {
-                MainBottomBar(
-                    displayText = displayText,
-                    isRunning = isRunning,
-                    isDarkTheme = isDarkTheme,
-                    onAction = onAction
+                MainBottomNav(
+                    selectedTab = selectedTab,
+                    onTabSelect = { selectedTab = it }
                 )
             },
             floatingActionButton = {},
         ) { innerPadding ->
             val layoutDirection = LocalLayoutDirection.current
 
-            if (groups.isNotEmpty()) {
+            when (selectedTab) {
+                MainTab.Home -> HomeTabContent(
+                    displayText = displayText,
+                    isRunning = isRunning,
+                    isDarkTheme = isDarkTheme,
+                    onAction = onAction,
+                    modifier = Modifier.padding(innerPadding)
+                )
+                MainTab.Tools -> ToolsTabPlaceholder(modifier = Modifier.padding(innerPadding))
+                MainTab.Settings -> SettingsTabPlaceholder(modifier = Modifier.padding(innerPadding))
+                MainTab.Servers -> if (groups.isNotEmpty()) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -246,6 +255,7 @@ fun MainScreen(
                             )
                         )
                     }
+                }    
                 }
             }
         }
