@@ -1,5 +1,6 @@
 package com.v2ray.ang.ui.main
 
+import androidx.compose.foundation.background
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -23,7 +24,10 @@ fun MainBottomNav(
     onTabSelect: (MainTab) -> Unit
 ) {
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface
+        modifier = androidx.compose.ui.Modifier.background(
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
+        ),
+        containerColor = androidx.compose.ui.graphics.Color.Transparent
     ) {
         MainTab.values().forEach { tab ->
             NavigationBarItem(
