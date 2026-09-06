@@ -59,6 +59,20 @@ fun MainScreen(
     var showDelDuplicateConfirm by remember { mutableStateOf(false) }
     var showDelInvalidConfirm by remember { mutableStateOf(false) }
     var showRemoveConfirm by remember { mutableStateOf<String?>(null) }
+    val handleMoreMenuAction: (MainMoreMenuAction) -> Unit = { action ->
+        when (action) {
+            MainMoreMenuAction.RestartService -> onAction(MainAction.RestartService)
+            MainMoreMenuAction.DeleteAll -> showDelAllConfirm = true
+            MainMoreMenuAction.DeleteDuplicate -> showDelDuplicateConfirm = true
+            MainMoreMenuAction.DeleteInvalid -> showDelInvalidConfirm = true
+            MainMoreMenuAction.ExportAll -> onAction(MainAction.ExportAll)
+            MainMoreMenuAction.LocateSelected -> onAction(MainAction.LocateSelectedServer)
+            MainMoreMenuAction.SortByTestResults -> onAction(MainAction.SortByTestResults)
+            MainMoreMenuAction.TestAll -> onAction(MainAction.TestAllServers)
+            MainMoreMenuAction.TestAllRealPing -> onAction(MainAction.TestRealAllServers)
+            MainMoreMenuAction.UpdateSubscriptions -> onAction(MainAction.UpdateSubscriptions)
+        }
+    }
 
     var shareTarget by remember { mutableStateOf<Triple<String, ProfileItem, Boolean>?>(null) }
     val removeServer: (String) -> Unit = { guid ->
@@ -162,20 +176,7 @@ fun MainScreen(
                     onSearchToggle = { show: Boolean -> showSearch = show },
                     onMenuClick = { scope.launch { drawerState.open() } },
                     onAction = onAction,
-                    onMoreMenuAction = { action ->
-                        when (action) {
-                            MainMoreMenuAction.RestartService -> onAction(MainAction.RestartService)
-                            MainMoreMenuAction.DeleteAll -> showDelAllConfirm = true
-                            MainMoreMenuAction.DeleteDuplicate -> showDelDuplicateConfirm = true
-                            MainMoreMenuAction.DeleteInvalid -> showDelInvalidConfirm = true
-                            MainMoreMenuAction.ExportAll -> onAction(MainAction.ExportAll)
-                            MainMoreMenuAction.LocateSelected -> onAction(MainAction.LocateSelectedServer)
-                            MainMoreMenuAction.SortByTestResults -> onAction(MainAction.SortByTestResults)
-                            MainMoreMenuAction.TestAll -> onAction(MainAction.TestAllServers)
-                            MainMoreMenuAction.TestAllRealPing -> onAction(MainAction.TestRealAllServers)
-                            MainMoreMenuAction.UpdateSubscriptions -> onAction(MainAction.UpdateSubscriptions)
-                        }
-                    }
+                    onMoreMenuAction = handleMoreMenuAction
                 )
             },
             bottomBar = {
@@ -196,8 +197,15 @@ fun MainScreen(
                     onAction = onAction,
                     modifier = Modifier.padding(innerPadding)
                 )
-                MainTab.Tools -> ToolsTabPlaceholder(modifier = Modifier.padding(innerPadding))
-                MainTab.Settings -> SettingsTabPlaceholder(modifier = Modifier.padding(innerPadding))
+                MainTab.Tools -> ToolsTabContent(
+                    onImportAction = onAction,
+                    onMoreMenuAction = handleMoreMenuAction,
+                    modifier = Modifier.padding(innerPadding)
+                )
+                MainTab.Settings -> SettingsTabContent(
+                    onNavigate = onNavigate,
+                    modifier = Modifier.padding(innerPadding)
+                )
                 MainTab.Servers -> if (groups.isNotEmpty()) {
                 Column(
                     modifier = Modifier
