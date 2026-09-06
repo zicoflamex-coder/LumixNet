@@ -145,7 +145,7 @@ object ThemeManager {
         _themeMode.value =
             MmkvManager.decodeSettingsString(AppConfig.PREF_UI_MODE_NIGHT, "0") ?: "0"
         _dynamicColorEnabled.value =
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, true)
+            MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
     }
 }
 
