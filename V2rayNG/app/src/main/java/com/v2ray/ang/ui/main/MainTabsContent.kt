@@ -1,5 +1,7 @@
 package com.v2ray.ang.ui.main
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,10 +38,16 @@ fun HomeTabContent(
     ) {
         FloatingActionButton(
             onClick = { onAction(MainAction.ToggleService) },
-            modifier = Modifier.size(120.dp),
-            containerColor = if (isRunning) colorFabActive
-            else if (isDarkTheme) colorFabInactiveDark
-            else colorFabInactiveLight
+            modifier = Modifier
+                .size(120.dp)
+                .border(
+                    width = 1.dp,
+                    color = Color.White.copy(alpha = 0.25f),
+                    shape = CircleShape
+                ),
+            shape = CircleShape,
+            containerColor = if (isRunning) colorFabActive.copy(alpha = 0.55f)
+            else Color.White.copy(alpha = 0.12f)
         ) {
             Icon(
                 painter = if (isRunning) painterResource(R.drawable.ic_stop_24dp)
