@@ -1,132 +1,103 @@
 package com.v2ray.ang.ui.main
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.v2ray.ang.R
+import com.v2ray.ang.dto.entities.ProfileItem
+import com.v2ray.ang.enums.EConfigType
+import com.v2ray.ang.extension.isComplexType
+import com.v2ray.ang.ui.compose.AppDropdownMenuItems
+import com.v2ray.ang.ui.compose.SelectListDialog
+
+private enum class ImportMenuAction(@StringRes val labelRes: Int, val action: MainAction) {
+    QRCode(R.string.menu_item_import_config_qrcode, MainAction.ImportQRcode),
+    Clipboard(R.string.menu_item_import_config_clipboard, MainAction.ImportClipboard),
+    LocalFile(R.string.menu_item_import_config_local, MainAction.ImportConfigLocal),
+    PolicyGroup(R.string.menu_item_import_config_policy_group, MainAction.ImportManually(EConfigType.POLICYGROUP.value)),
+    ProxyChain(R.string.menu_item_import_config_proxy_chain, MainAction.ImportManually(EConfigType.PROXYCHAIN.value)),
+    Vmess(R.string.menu_item_import_config_manually_vmess, MainAction.ImportManually(EConfigType.VMESS.value)),
+    Vless(R.string.menu_item_import_config_manually_vless, MainAction.ImportManually(EConfigType.VLESS.value)),
+    Shadowsocks(R.string.menu_item_import_config_manually_ss, MainAction.ImportManually(EConfigType.SHADOWSOCKS.value)),
+    Socks(R.string.menu_item_import_config_manually_socks, MainAction.ImportManually(EConfigType.SOCKS.value)),
+    Http(R.string.menu_item_import_config_manually_http, MainAction.ImportManually(EConfigType.HTTP.value)),
+    Trojan(R.string.menu_item_import_config_manually_trojan, MainAction.ImportManually(EConfigType.TROJAN.value)),
+    WireGuard(R.string.menu_item_import_config_manually_wireguard, MainAction.ImportManually(EConfigType.WIREGUARD.value)),
+    Hysteria2(R.string.menu_item_import_config_manually_hysteria2, MainAction.ImportManually(EConfigType.HYSTERIA2.value))
+}
+
+enum class MainMoreMenuAction(@StringRes val labelRes: Int) {
+    RestartService(R.string.title_service_restart),
+    DeleteAll(R.string.title_del_all_config),
+    DeleteDuplicate(R.string.title_del_duplicate_config),
+    DeleteInvalid(R.string.title_del_invalid_config),
+    ExportAll(R.string.title_export_all),
+    LocateSelected(R.string.title_locate_selected_config),
+    SortByTestResults(R.string.title_sort_by_test_results),
+    TestAll(R.string.title_ping_all_server),
+    TestAllRealPing(R.string.title_real_ping_all_server),
+    UpdateSubscriptions(R.string.title_sub_update)
+}
+
+internal enum class ServerMenuAction(
+    @StringRes val labelRes: Int,
+    val isShareAction: Boolean,
+    val supportsComplexProfiles: Boolean,
+) {
+    ShareQRCode(R.string.share_method_qrcode, isShareAction = true, supportsComplexProfiles = false),
+    ShareClipboard(R.string.share_method_clipboard, isShareAction = true, supportsComplexProfiles = false),
+    ShareFullContent(R.string.share_method_full_content, isShareAction = true, supportsComplexProfiles = true),
+    Edit(R.string.action_edit, isShareAction = false, supportsComplexProfiles = true),
+    Delete(R.string.action_delete, isShareAction = false, supportsComplexProfiles = true),
+}
+
+internal fun serverMenuActions(
+    isComplexProfile: Boolean,
+    includeManagementActions: Boolean,
+): List<ServerMenuAction> = ServerMenuAction.entries.filter { action ->
+    (includeManagementActions || action.isShareAction) && (!isComplexProfile || action.supportsComplexProfiles)
+}
 
 @Composable
-fun HomeTabContent(
-    displayText: String,
-    isRunning: Boolean,
-    isDarkTheme: Boolean,
+fun ImportMenuContent(onAction: (MainAction) -> Unit) = AppDropdownMenuItems(
+    items = ImportMenuAction.entries,
+    labelRes = { it.labelRes },
+    onSelected = { onAction(it.action) }
+)
+
+@Composable
+fun MoreMenuContent(onSelected: (MainMoreMenuAction) -> Unit) = AppDropdownMenuItems(
+    items = MainMoreMenuAction.entries,
+    labelRes = { it.labelRes },
+    onSelected = onSelected
+)
+
+@Composable
+fun ShareMethodDialog(
+    guid: String,
+    profile: ProfileItem,
+    more: Boolean,
+    onDismiss: () -> Unit,
     onAction: (MainAction) -> Unit,
-    modifier: Modifier = Modifier
+    onRemove: (String) -> Unit,
 ) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        val orbColors = if (isRunning) {
-            listOf(Color(0xFF55D6A5), Color(0xFF0B4A3C))
-        } else {
-            listOf(Color(0xFF62A0FF), Color(0xFF0C1D3A))
-        }
-        Box(
-            modifier = Modifier
-                .size(140.dp)
-                .clip(CircleShape)
-                .background(Brush.radialGradient(orbColors))
-                .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape)
-                .clickable { onAction(MainAction.ToggleService) },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = if (isRunning) painterResource(R.drawable.ic_stop_24dp)
-                else painterResource(R.drawable.ic_play_24dp),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(48.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = displayText,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
-}
-
-@Composable
-private fun GlassRow(
-    label: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(alpha = 0.06f))
-            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
-}
-
-@Composable
-fun ToolsTabContent(
-    onImportAction: (MainAction) -> Unit,
-    onMoreMenuAction: (MainMoreMenuAction) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-        item { GlassRow(stringResource(R.string.menu_item_import_config_qrcode)) { onImportAction(MainAction.ImportQRcode) } }
-        item { GlassRow(stringResource(R.string.menu_item_import_config_clipboard)) { onImportAction(MainAction.ImportClipboard) } }
-        item { GlassRow(stringResource(R.string.menu_item_import_config_local)) { onImportAction(MainAction.ImportConfigLocal) } }
-        items(MainMoreMenuAction.entries) { action ->
-            GlassRow(stringResource(action.labelRes)) { onMoreMenuAction(action) }
-        }
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-    }
-}
-
-@Composable
-fun SettingsTabContent(
-    onNavigate: (MainDestination) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-        items(MainDestination.entries) { destination ->
-            GlassRow(stringResource(destination.labelRes)) { onNavigate(destination) }
-        }
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-    }
+    val menuActions = serverMenuActions(
+        isComplexProfile = profile.configType.isComplexType(),
+        includeManagementActions = more,
+    )
+    SelectListDialog(
+        options = menuActions,
+        optionText = { stringResource(it.labelRes) },
+        onSelected = { action ->
+            onDismiss()
+            when (action) {
+                ServerMenuAction.ShareQRCode -> onAction(MainAction.ShareQRCode(guid))
+                ServerMenuAction.ShareClipboard -> onAction(MainAction.ShareClipboard(guid))
+                ServerMenuAction.ShareFullContent -> onAction(MainAction.ShareFullContent(guid))
+                ServerMenuAction.Edit -> onAction(MainAction.EditServer(guid, profile))
+                ServerMenuAction.Delete -> onRemove(guid)
+            }
+        },
+        onDismiss = onDismiss
+    )
 }
