@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.v2ray.ang.AppConfig
+import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.ConnectionTestResult
 import com.v2ray.ang.dto.GroupMapItem
@@ -81,6 +82,9 @@ class MainViewModel(
     @Volatile
     private var testingGroupId: String? = null
 
+    private var speedPollingJob: Job? = null
+    private var lastTrafficQueryTime = 0L
+
     private val initialPageReady = CompletableDeferred<Unit>()
 
     // ---------- Service events ----------
@@ -99,11 +103,18 @@ class MainViewModel(
 
     private fun handleServiceEvent(event: MainServiceEvent) {
         when (event) {
-            MainServiceEvent.StateRunning -> updateRunningState(true, clearTestingText = false)
-            MainServiceEvent.StateNotRunning -> updateRunningState(false, clearTestingText = false)
+            MainServiceEvent.StateRunning -> {
+                updateRunningState(true, clearTestingText = false)
+                startSpeedPolling()
+            }
+            MainServiceEvent.StateNotRunning -> {
+                updateRunningState(false, clearTestingText = false)
+                stopSpeedPolling()
+            }
             MainServiceEvent.StateStartSuccess -> {
                 toastSuccess(R.string.toast_services_success)
                 updateRunningState(true)
+                startSpeedPolling()
             }
 
             MainServiceEvent.StateStartFailure -> {
@@ -111,7 +122,10 @@ class MainViewModel(
                 updateRunningState(false)
             }
 
-            MainServiceEvent.StateStopSuccess -> updateRunningState(false)
+            MainServiceEvent.StateStopSuccess -> {
+                updateRunningState(false)
+                stopSpeedPolling()
+            }
             is MainServiceEvent.MeasureDelayResult -> {
                 _uiState.update { it.copy(status = MainStatus.ConnectionTest(event.result)) }
             }
@@ -131,6 +145,52 @@ class MainViewModel(
             is MainServiceEvent.MeasureConfigFinish -> {
                 onTestsFinished()
             }
+        }
+    }
+
+    private fun startSpeedPolling() {
+        if (speedPollingJob != null) return
+        lastTrafficQueryTime = System.currentTimeMillis()
+        _uiState.update {
+            it.copy(connectedServerName = CoreServiceManager.getRunningServerName())
+        }
+        speedPollingJob = viewModelScope.launch(ioDispatcher) {
+            while (true) {
+                delay(1000L)
+                val now = System.currentTimeMillis()
+                val elapsedSeconds = (now - lastTrafficQueryTime) / 1000.0
+                lastTrafficQueryTime = now
+                var up = 0L
+                var down = 0L
+                CoreServiceManager.queryAllOutboundTrafficStats().forEach { stat ->
+                    if (stat.tag != AppConfig.TAG_BLOCKED) {
+                        when (stat.direction) {
+                            AppConfig.UPLINK -> up += stat.value
+                            AppConfig.DOWNLINK -> down += stat.value
+                        }
+                    }
+                }
+                val upSpeed = if (elapsedSeconds > 0) (up / elapsedSeconds).toLong() else 0L
+                val downSpeed = if (elapsedSeconds > 0) (down / elapsedSeconds).toLong() else 0L
+                _uiState.update {
+                    it.copy(
+                        uploadSpeedBytesPerSec = upSpeed,
+                        downloadSpeedBytesPerSec = downSpeed
+                    )
+                }
+            }
+        }
+    }
+
+    private fun stopSpeedPolling() {
+        speedPollingJob?.cancel()
+        speedPollingJob = null
+        _uiState.update {
+            it.copy(
+                uploadSpeedBytesPerSec = 0L,
+                downloadSpeedBytesPerSec = 0L,
+                connectedServerName = ""
+            )
         }
     }
 
