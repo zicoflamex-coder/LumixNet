@@ -195,6 +195,9 @@ fun MainScreen(
                     isRunning = isRunning,
                     isDarkTheme = isDarkTheme,
                     onAction = onAction,
+                    uploadSpeedBytesPerSec = uiState.uploadSpeedBytesPerSec,
+                    downloadSpeedBytesPerSec = uiState.downloadSpeedBytesPerSec,
+                    connectedServerName = uiState.connectedServerName,
                     modifier = Modifier.padding(innerPadding)
                 )
                 MainTab.Tools -> ToolsTabContent(
