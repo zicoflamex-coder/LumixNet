@@ -260,6 +260,16 @@ object NotificationManager {
             }
         }
 
+        val uploadSpeed = (proxyUplink + directUplink) / sinceLastQueryInSeconds
+        val downloadSpeed = (proxyDownlink + directDownlink) / sinceLastQueryInSeconds
+        getService()?.let { service ->
+            MessageHelper.sendMsg2UI(
+                service,
+                AppConfig.MSG_SPEED_UPDATE,
+                SpeedStat(uploadSpeed.toLong(), downloadSpeed.toLong(), CoreServiceManager.getRunningServerName())
+            )
+        }
+
         val proxyTotal = proxyUplink + proxyDownlink
         val directTotal = directUplink + directDownlink
         val zeroSpeed = proxyTotal + directTotal == 0L
