@@ -9,6 +9,7 @@ import com.v2ray.ang.AngApplication
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.ConnectionTestResult
+import com.v2ray.ang.dto.SpeedStat
 import com.v2ray.ang.dto.SubscriptionUpdateResult
 import com.v2ray.ang.dto.TestServiceMessage
 import com.v2ray.ang.dto.entities.ProfileItem
@@ -69,6 +70,10 @@ class MainRepository(
                 AppConfig.MSG_MEASURE_CONFIG_FINISH -> MainServiceEvent.MeasureConfigFinish(
                     safeIntent.getStringExtra("content")
                 )
+
+                AppConfig.MSG_SPEED_UPDATE -> safeIntent
+                    .serializable<SpeedStat>("content")
+                    ?.let { MainServiceEvent.SpeedUpdate(it.uploadBps, it.downloadBps, it.serverName) }
 
                 else -> null
             }
