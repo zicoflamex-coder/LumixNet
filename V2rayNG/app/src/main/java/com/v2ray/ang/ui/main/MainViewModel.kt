@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.v2ray.ang.AppConfig
+import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.ConnectionTestResult
 import com.v2ray.ang.dto.GroupMapItem
@@ -81,6 +82,9 @@ class MainViewModel(
     @Volatile
     private var testingGroupId: String? = null
 
+    private var speedPollingJob: Job? = null
+    private var lastTrafficQueryTime = 0L
+
     private val initialPageReady = CompletableDeferred<Unit>()
 
     // ---------- Service events ----------
@@ -99,14 +103,18 @@ class MainViewModel(
 
     private fun handleServiceEvent(event: MainServiceEvent) {
         when (event) {
-            MainServiceEvent.StateRunning -> updateRunningState(true, clearTestingText = false)
+            MainServiceEvent.StateRunning -> {
+                updateRunningState(true, clearTestingText = false)
+                startSpeedPolling()
+            }
             MainServiceEvent.StateNotRunning -> {
                 updateRunningState(false, clearTestingText = false)
-                resetSpeedStats()
+                stopSpeedPolling()
             }
             MainServiceEvent.StateStartSuccess -> {
                 toastSuccess(R.string.toast_services_success)
                 updateRunningState(true)
+                startSpeedPolling()
             }
 
             MainServiceEvent.StateStartFailure -> {
@@ -116,7 +124,7 @@ class MainViewModel(
 
             MainServiceEvent.StateStopSuccess -> {
                 updateRunningState(false)
-                resetSpeedStats()
+                stopSpeedPolling()
             }
             is MainServiceEvent.MeasureDelayResult -> {
                 _uiState.update { it.copy(status = MainStatus.ConnectionTest(event.result)) }
@@ -137,20 +145,46 @@ class MainViewModel(
             is MainServiceEvent.MeasureConfigFinish -> {
                 onTestsFinished()
             }
+        }
+    }
 
-            is MainServiceEvent.SpeedUpdate -> {
+    private fun startSpeedPolling() {
+        if (speedPollingJob != null) return
+        lastTrafficQueryTime = System.currentTimeMillis()
+        _uiState.update {
+            it.copy(connectedServerName = CoreServiceManager.getRunningServerName())
+        }
+        speedPollingJob = viewModelScope.launch(ioDispatcher) {
+            while (true) {
+                delay(1000L)
+                val now = System.currentTimeMillis()
+                val elapsedSeconds = (now - lastTrafficQueryTime) / 1000.0
+                lastTrafficQueryTime = now
+                var up = 0L
+                var down = 0L
+                CoreServiceManager.queryAllOutboundTrafficStats().forEach { stat ->
+                    if (stat.tag != AppConfig.TAG_BLOCKED) {
+                        when (stat.direction) {
+                            AppConfig.UPLINK -> up += stat.value
+                            AppConfig.DOWNLINK -> down += stat.value
+                        }
+                    }
+                }
+                val upSpeed = if (elapsedSeconds > 0) (up / elapsedSeconds).toLong() else 0L
+                val downSpeed = if (elapsedSeconds > 0) (down / elapsedSeconds).toLong() else 0L
                 _uiState.update {
                     it.copy(
-                        uploadSpeedBytesPerSec = event.uploadBps,
-                        downloadSpeedBytesPerSec = event.downloadBps,
-                        connectedServerName = event.serverName
+                        uploadSpeedBytesPerSec = upSpeed,
+                        downloadSpeedBytesPerSec = downSpeed
                     )
                 }
             }
         }
     }
 
-    private fun resetSpeedStats() {
+    private fun stopSpeedPolling() {
+        speedPollingJob?.cancel()
+        speedPollingJob = null
         _uiState.update {
             it.copy(
                 uploadSpeedBytesPerSec = 0L,
@@ -210,7 +244,454 @@ class MainViewModel(
     private fun mutableServerGroupState(groupId: String): MutableStateFlow<ServerGroupUiState> =
         groupUiFlows.computeIfAbsent(groupId) { MutableStateFlow(ServerGroupUiState()) }
 
-< truncated lines 213-660 >
+    private fun currentServers(): List<ServersCache> =
+        mutableServerGroupState(uiState.value.selectedGroupId).value.servers
+
+    // ---------- Action handler ----------
+    fun onAction(action: MainAction) {
+        when (action) {
+            MainAction.Initialize -> initialize()
+            MainAction.RefreshGroups -> setupGroupTab(forceRefresh = true)
+            MainAction.TestAllServers -> testAllRealPing(true)
+            MainAction.TestRealAllServers -> testAllRealPing()
+            MainAction.CancelTesting -> cancelAllPing()
+            MainAction.RemoveAllServers -> removeAllServerAsync()
+            MainAction.RemoveDuplicateServers -> removeDuplicateServerAsync()
+            MainAction.RemoveInvalidServers -> removeInvalidServerAsync()
+            MainAction.SortByTestResults -> sortByTestResultsAsync()
+            MainAction.UpdateSubscriptions -> importConfigViaSub()
+            MainAction.ExportAll -> exportAllAsync()
+            is MainAction.SelectGroup -> subscriptionIdChanged(action.groupId)
+            is MainAction.SelectServer -> updateSelectedGuid(action.guid)
+            is MainAction.RemoveServer -> removeServerAndRefresh(action.guid)
+            is MainAction.Search -> filterConfig(action.query)
+            is MainAction.ImportBatchConfig -> importBatchConfig(action.configText)
+            MainAction.LocateHandled -> consumeLocateTarget()
+            is MainAction.ShareQRCode -> {
+                val bitmap = dataSource.share2QRCode(action.guid)
+                _uiState.update { it.copy(shareQRCodeBitmap = bitmap) }
+            }
+
+            MainAction.DismissQRCodeDialog -> {
+                _uiState.update { it.copy(shareQRCodeBitmap = null) }
+            }
+
+            MainAction.ToggleService,
+            MainAction.TestCurrentServer,
+            MainAction.ImportQRcode,
+            MainAction.ImportClipboard,
+            MainAction.ImportConfigLocal,
+            is MainAction.ImportManually,
+            MainAction.RestartService,
+            MainAction.LocateSelectedServer,
+            is MainAction.EditServer,
+            is MainAction.ShareClipboard,
+            is MainAction.ShareFullContent -> {
+                // Handled by Activity via its onAction lambda
+            }
+        }
+    }
+
+    // ---------- Initialization ----------
+    fun initialize() {
+        viewModelScope.launch(preloadDispatcher) {
+            try {
+                initialPageReady.await()
+                delay(32)
+                dataSource.initAssets()
+                dataSource.syncSubscriptions()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                LogUtil.e(AppConfig.TAG, "Main background initialization failed", error)
+            }
+        }
+    }
+
+    fun refreshUiSettings() {
+        _uiState.update {
+            it.copy(
+                confirmRemove = dataSource.getConfirmRemove(),
+                doubleColumnDisplay = dataSource.getDoubleColumnDisplay()
+            )
+        }
+    }
+
+    // ---------- Group & server loading ----------
+    private suspend fun buildServersCache(guids: List<String>): List<ServersCache> =
+        guids.mapNotNull { guid ->
+            currentCoroutineContext().ensureActive()
+            val profile = dataSource.decodeServerConfig(guid) ?: return@mapNotNull null
+            val affiliation = dataSource.decodeAffiliationInfo(guid)
+            ServersCache(
+                guid = guid,
+                profile = profile.copy(),
+                testDelayMillis = affiliation?.testDelayMillis ?: 0L
+            )
+        }
+
+    private suspend fun loadGroup(
+        groupId: String,
+        forceRefresh: Boolean = false
+    ): List<ServersCache> {
+        val loadMutex = groupLoadMutexes.computeIfAbsent(groupId) { Mutex() }
+        return loadMutex.withLock {
+            if (!forceRefresh) {
+                cacheMutex.withLock { groupDataCache[groupId]?.let { return@withLock it } }
+            }
+            val servers = buildServersCache(dataSource.getServerGuidList(groupId))
+            currentCoroutineContext().ensureActive()
+            cacheMutex.withLock { groupDataCache[groupId] = servers }
+            servers
+        }
+    }
+
+    private fun applyKeywordFilter(servers: List<ServersCache>): List<ServersCache> {
+        val keyword = keywordFilter.trim()
+        if (keyword.isEmpty()) return servers
+        val regex = try {
+            Regex(keyword, RegexOption.IGNORE_CASE)
+        } catch (_: PatternSyntaxException) {
+            return servers
+        }
+        return servers.filter { cache ->
+            val profile = cache.profile
+            profile.remarks.matchesPattern(regex, keyword) ||
+                    profile.description.orEmpty().matchesPattern(regex, keyword) ||
+                    profile.server.orEmpty().matchesPattern(regex, keyword) ||
+                    profile.configType.name.matchesPattern(regex, keyword)
+        }
+    }
+
+    private fun updateGroupUi(groupId: String, servers: List<ServersCache>) {
+        val filteredServers = applyKeywordFilter(servers)
+        mutableServerGroupState(groupId).value = ServerGroupUiState(
+            servers = filteredServers,
+            rows = buildServerRows(groupId, filteredServers)
+        )
+    }
+
+    private fun buildServerRows(groupId: String, servers: List<ServersCache>): List<ServerRowUiModel> {
+        val subscriptionRemarks = if (groupId.isEmpty()) {
+            servers.asSequence()
+                .map { it.profile.subscriptionId }
+                .filter { it.isNotEmpty() }
+                .distinct()
+                .associateWith { subscriptionId ->
+                    dataSource.getSubscriptionItem(subscriptionId)?.remarks.orEmpty()
+                }
+        } else {
+            emptyMap()
+        }
+        return servers.map { server ->
+            buildServerRowUiModel(
+                server = server,
+                subscriptionRemarks = subscriptionRemarks[server.profile.subscriptionId].orEmpty()
+            )
+        }
+    }
+
+    fun getSubscriptions(): List<SubscriptionCache> = dataSource.getSubscriptions()
+
+    private fun resolveSelectedGroup(groups: List<GroupMapItem>): String {
+        val current = uiState.value.selectedGroupId
+        val resolved = when {
+            groups.isEmpty() -> ""
+            groups.any { it.id == current } -> current
+            else -> groups.first().id
+        }
+        if (resolved != current) {
+            dataSource.setSelectedSubscriptionId(resolved)
+        }
+        return resolved
+    }
+
+    private fun radialPreloadOrder(groups: List<GroupMapItem>, selectedIndex: Int): List<String> {
+        if (groups.isEmpty()) return emptyList()
+        val result = ArrayList<String>((groups.size - 1).coerceAtLeast(0))
+        for (distance in 1 until groups.size) {
+            val right = selectedIndex + distance
+            val left = selectedIndex - distance
+            if (right in groups.indices) result += groups[right].id
+            if (left in groups.indices) result += groups[left].id
+        }
+        return result
+    }
+
+    fun setupGroupTab(forceRefresh: Boolean = false): Job {
+        setupGroupJob?.cancel()
+        preloadJob?.cancel()
+        selectedGroupLoadJob?.cancel()
+
+        return viewModelScope.launch(ioDispatcher) {
+            try {
+                if (forceRefresh) {
+                    cacheMutex.withLock { groupDataCache.clear() }
+                }
+                val groups = dataSource.getSubscriptions().map {
+                    GroupMapItem(id = it.guid, remarks = it.subscription.remarks)
+                }
+                val selectedGroup = resolveSelectedGroup(groups)
+                val validIds = groups.mapTo(HashSet()) { it.id }
+                groupUiFlows.keys.removeAll { it !in validIds }
+                groupServerFlows.keys.removeAll { it !in validIds }
+                groupLoadMutexes.keys.removeAll { it !in validIds }
+
+                _uiState.update {
+                    it.copy(
+                        groups = groups,
+                        selectedGroupId = selectedGroup,
+                        selectedGuid = dataSource.getSelectServer(),
+                    )
+                }
+                groups.forEach { mutableServerGroupState(it.id) }
+
+                if (groups.isEmpty()) {
+                    cacheMutex.withLock { groupDataCache.clear() }
+                    return@launch
+                }
+
+                val selectedServers = loadGroup(selectedGroup, forceRefresh)
+                updateGroupUi(selectedGroup, selectedServers)
+
+                if (!initialPageReady.isCompleted) {
+                    initialPageReady.complete(Unit)
+                }
+
+                val selectedIndex =
+                    groups.indexOfFirst { it.id == selectedGroup }.coerceAtLeast(0)
+                val preloadOrder = radialPreloadOrder(groups, selectedIndex)
+                preloadJob = viewModelScope.launch(preloadDispatcher) {
+                    preloadOrder.forEach { groupId ->
+                        ensureActive()
+                        delay(32)
+                        val servers = loadGroup(groupId, forceRefresh)
+                        updateGroupUi(groupId, servers)
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                LogUtil.e(AppConfig.TAG, "Failed to set up group tabs", error)
+            } finally {
+                if (!initialPageReady.isCompleted) {
+                    initialPageReady.complete(Unit)
+                }
+            }
+        }.also { setupGroupJob = it }
+    }
+
+    // ---------- Business actions (coroutine-based) ----------
+    private fun importBatchConfig(configText: String) {
+        launchLoading {
+            withContext(ioDispatcher) {
+                try {
+                    val (count, countSub) = dataSource.importBatchConfig(
+                        configText, uiState.value.selectedGroupId, true
+                    )
+                    when {
+                        count > 0 -> {
+                            toast(dataSource.getString(R.string.title_import_config_count, count))
+                            setupGroupTab(forceRefresh = true)
+                        }
+
+                        counSub > 0 -> setupGroupTab(forceRefresh = true)
+                        else -> toastError(R.string.toast_failure)
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Failed to import batch config", e)
+                    toastError(R.string.toast_failure)
+                }
+            }
+        }
+    }
+
+    private fun importConfigViaSub() {
+        val subId = uiState.value.selectedGroupId
+        launchLoading {
+            withContext(ioDispatcher) {
+                try {
+                    val result = if (subId.isEmpty()) {
+                        dataSource.updateConfigViaSubAll()
+                    } else {
+                        val item = dataSource.getSubscriptionItem(subId) ?: return@withContext
+                        dataSource.updateConfigViaSub(SubscriptionCache(subId, item))
+                    }
+                    when {
+                        result.successCount + result.failureCount + result.skipCount == 0 ->
+                            toast(R.string.title_update_subscription_no_subscription)
+
+                        result.successCount > 0 && result.failureCount + result.skipCount == 0 ->
+                            toast(dataSource.getString(R.string.title_update_config_count, result.configCount))
+
+                        else ->
+                            toast(dataSource.getString(R.string.title_update_subscription_result, result.configCount, result.successCount, result.failureCount, result.skipCount))
+                    }
+                    if (result.configCount > 0) {
+                        setupGroupTab(forceRefresh = true)
+                        refreshSelectedGuid()
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Subscription update failed", e)
+                    toastError(R.string.toast_failure)
+                }
+            }
+        }
+    }
+
+    private fun exportAllAsync() {
+        launchLoading {
+            withContext(ioDispatcher) {
+                try {
+                    val groupId = uiState.value.selectedGroupId
+                    val list = if (groupId.isEmpty() && keywordFilter.isEmpty()) {
+                        dataSource.getServerGuidList("")
+                    } else {
+                        currentServers().map { it.guid }
+                    }
+                    val ret = dataSource.shareNonCustomConfigsToClipboard(list)
+                    if (ret > 0) {
+                        toast(dataSource.getString(R.string.title_export_config_count, ret))
+                    } else {
+                        toastError(R.string.toast_failure)
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Export failed", e)
+                    toastError(R.string.toast_failure)
+                }
+            }
+        }
+    }
+
+    private fun removeAllServerAsync() {
+        launchLoading {
+            withContext(ioDispatcher) {
+                try {
+                    val count =
+                        if (uiState.value.selectedGroupId.isEmpty() && keywordFilter.isEmpty()) {
+                            dataSource.removeAllServer()
+                        } else {
+                            val guids = currentServers().map { it.guid }
+                            guids.forEach { dataSource.removeServer(it) }
+                            guids.size
+                        }
+                    viewModelScope.launch(ioDispatcher) {
+                        cacheMutex.withLock { groupDataCache.clear() }
+                    }
+                    setupGroupTab(forceRefresh = true)
+                    toast(dataSource.getString(R.string.title_del_config_count, count))
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Delete all failed", e)
+                    toastError(R.string.toast_failure)
+                }
+            }
+        }
+    }
+
+    private fun removeDuplicateServerAsync() {
+        launchLoading {
+            withContext(ioDispatcher) {
+                try {
+                    val seen = HashSet<ProfileItem>()
+                    val duplicates = ArrayList<String>()
+                    currentServers().forEach { server ->
+                        val profile = server.profile
+                        if (!profile.configType.isComplexType()) {
+                            val identity = profile.duplicateIdentity()
+                            if (!seen.add(identity)) duplicates += server.guid
+                        }
+                    }
+                    duplicates.forEach { dataSource.removeServer(it) }
+                    setupGroupTab(forceRefresh = true)
+                    toast(dataSource.getString(R.string.title_del_duplicate_config_count, duplicates.size))
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Delete duplicate failed", e)
+                    toastError(R.string.toast_failure)
+                }
+            }
+        }
+    }
+
+    private fun removeInvalidServerAsync() {
+        launchLoading {
+            withContext(ioDispatcher) {
+                try {
+                    val count = removeInvalidServerInternal()
+                    viewModelScope.launch(ioDispatcher) {
+                        cacheMutex.withLock { groupDataCache.clear() }
+                        setupGroupTab(forceRefresh = true)
+                    }
+                    toast(dataSource.getString(R.string.title_del_config_count, count))
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Delete invalid failed", e)
+                    toastError(R.string.toast_failure)
+                }
+            }
+        }
+    }
+
+    private fun removeInvalidServerInternal(): Int {
+        val visibleServersOnly =
+            uiState.value.selectedGroupId.isNotEmpty() || keywordFilter.isNotBlank()
+        return if (visibleServersOnly) {
+            currentServers().sumOf { server ->
+                dataSource.removeInvalidServerByGuid(server.guid)
+            }
+        } else {
+            dataSource.removeInvalidServersInGroup("")
+        }
+    }
+
+    private fun sortByTestResultsAsync() {
+        launchLoading {
+            withContext(ioDispatcher) {
+                try {
+                    sortByTestResultsInternal()
+                    cacheMutex.withLock { groupDataCache.clear() }
+                    setupGroupTab(forceRefresh = true)
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Sort by test results failed", e)
+                    toastError(R.string.toast_failure)
+                }
+            }
+        }
+    }
+
+    private fun sortByTestResultsInternal() {
+        val subs = if (uiState.value.selectedGroupId.isEmpty()) {
+            dataSource.getSubsList()
+        } else {
+            listOf(uiState.value.selectedGroupId)
+        }
+        subs.forEach { dataSource.sortByTestResultsForSub(it) }
+    }
+
+    fun subscriptionIdChanged(id: String) {
+        if (_uiState.value.groups.none { it.id == id }) return
+        mutableServerGroupState(id)
+        if (uiState.value.selectedGroupId != id) {
+            dataSource.setSelectedSubscriptionId(id)
+            _uiState.update { it.copy(selectedGroupId = id) }
+        }
+        selectedGroupLoadJob?.cancel()
+        selectedGroupLoadJob = viewModelScope.launch(ioDispatcher) {
+            try {
+                updateGroupUi(id, loadGroup(id))
+            } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
                 LogUtil.e(AppConfig.TAG, "Failed to load selected group: $id", error)
