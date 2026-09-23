@@ -21,7 +21,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import com.v2ray.ang.AppConfig
+import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -101,6 +106,31 @@ private val DarkColor = darkColorScheme(
     surfaceContainerHighest = Color(0xFF19305A),
 )
 
+private val PoppinsFontFamily = FontFamily(
+    Font(R.font.poppins_regular, FontWeight.Normal),
+    Font(R.font.poppins_medium, FontWeight.Medium),
+    Font(R.font.poppins_semibold, FontWeight.SemiBold),
+    Font(R.font.poppins_bold, FontWeight.Bold)
+)
+
+private val baseTypography = Typography()
+val LumixTypography = Typography(
+    displayLarge = baseTypography.displayLarge.copy(fontFamily = PoppinsFontFamily),
+    displayMedium = baseTypography.displayMedium.copy(fontFamily = PoppinsFontFamily),
+    displaySmall = baseTypography.displaySmall.copy(fontFamily = PoppinsFontFamily),
+    headlineLarge = baseTypography.headlineLarge.copy(fontFamily = PoppinsFontFamily),
+    headlineMedium = baseTypography.headlineMedium.copy(fontFamily = PoppinsFontFamily),
+    headlineSmall = baseTypography.headlineSmall.copy(fontFamily = PoppinsFontFamily),
+    titleLarge = baseTypography.titleLarge.copy(fontFamily = PoppinsFontFamily, fontWeight = FontWeight.Bold),
+    titleMedium = baseTypography.titleMedium.copy(fontFamily = PoppinsFontFamily, fontWeight = FontWeight.SemiBold),
+    titleSmall = baseTypography.titleSmall.copy(fontFamily = PoppinsFontFamily, fontWeight = FontWeight.SemiBold),
+    bodyLarge = baseTypography.bodyLarge.copy(fontFamily = PoppinsFontFamily),
+    bodyMedium = baseTypography.bodyMedium.copy(fontFamily = PoppinsFontFamily),
+    bodySmall = baseTypography.bodySmall.copy(fontFamily = PoppinsFontFamily),
+    labelLarge = baseTypography.labelLarge.copy(fontFamily = PoppinsFontFamily, fontWeight = FontWeight.Medium),
+    labelMedium = baseTypography.labelMedium.copy(fontFamily = PoppinsFontFamily, fontWeight = FontWeight.Medium),
+    labelSmall = baseTypography.labelSmall.copy(fontFamily = PoppinsFontFamily, fontWeight = FontWeight.Medium)
+)
 // Semantic Colors
 val colorPing = Color(0xFF009966) // Green
 val colorPingRed = Color(0xFFFF0099) // Pink Red
@@ -189,7 +219,8 @@ fun AppTheme(
         LocalAppSnackbar provides snackbarController
     ) {
         MaterialTheme(
-            colorScheme = colorScheme
+            colorScheme = colorScheme,
+            typography = LumixTypography
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 AppSnackbarBridge(controller = snackbarController)
