@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Lumix Net</string>
+    <string name="app_name" translatable="false">LumixVPN</string>
     <string name="app_widget_name">Switch</string>
     <string name="app_tile_name">Switch</string>
     <string name="app_tile_first_use">Add a profile in the app before using this feature.</string>
@@ -24,7 +24,7 @@
     <string name="toast_services_failure">Failed to start service</string>
 
     <!--ServerActivity-->
-    <string name="title_server">Config</string>
+    <string name="title_server">Servers</string>
     <string name="menu_item_add_config">Add config</string>
     <string name="menu_item_save_config">Save config</string>
     <string name="menu_item_edit_config">Edit config</string>
