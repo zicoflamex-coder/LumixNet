@@ -29,6 +29,7 @@ import com.v2ray.ang.ui.compose.verticalScrollbar
 
 @Composable
 fun MainTopBar(
+    title: String,
     isLoading: Boolean,
     showSearch: Boolean,
     searchQuery: String,
@@ -48,7 +49,7 @@ fun MainTopBar(
     val maxMenuHeight = LocalConfiguration.current.screenHeightDp.dp - statusBarHeight - navBarHeight - 20.dp
 
     AppTopBar(
-        title = stringResource(R.string.title_server),
+        title = title,
         onBackClick = {},
         isLoading = isLoading,
         isSearchActive = showSearch,

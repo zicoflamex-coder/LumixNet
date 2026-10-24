@@ -44,64 +44,106 @@ fun HomeTabContent(
     connectedServerName: String,
     modifier: Modifier = Modifier
 ) {
+    val primaryText = if (isDarkTheme) Color(0xFFF3F7FF) else Color(0xFF10213D)
+    val secondaryText = if (isDarkTheme) Color(0xFF9FB2D1) else Color(0xFF536987)
+    val orbColors = if (isRunning) {
+        listOf(Color(0xFF48E0BC), Color(0xFF147A91), Color(0xFF0C1D3A))
+    } else {
+        listOf(Color(0xFF8AC7FF), Color(0xFF347CE0), Color(0xFF0C1D3A))
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        val orbColors = if (isRunning) {
-            listOf(Color(0xFF55D6A5), Color(0xFF0B4A3C))
-        } else {
-            listOf(Color(0xFF62A0FF), Color(0xFF0C1D3A))
-        }
+        Text(
+            text = "LUMIXVPN",
+            style = MaterialTheme.typography.headlineSmall,
+            color = primaryText
+        )
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(
+            text = "Private connection, simplified",
+            style = MaterialTheme.typography.bodyMedium,
+            color = secondaryText
+        )
+        Spacer(modifier = Modifier.height(30.dp))
+
         Box(
             modifier = Modifier
-                .size(140.dp)
+                .size(204.dp)
                 .clip(CircleShape)
-                .background(Brush.radialGradient(orbColors))
-                .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape)
-                .clickable { onAction(MainAction.ToggleService) },
+                .background(Brush.radialGradient(listOf(
+                    (if (isRunning) Color(0xFF36DDB8) else Color(0xFF4D9DFF)).copy(alpha = 0.16f),
+                    Color.Transparent
+                )))
+                .border(1.dp, Color(0xFF80B7FF).copy(alpha = 0.30f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = if (isRunning) painterResource(R.drawable.ic_stop_24dp)
-                else painterResource(R.drawable.ic_play_24dp),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(48.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = displayText,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        if (isRunning) {
-            Spacer(modifier = Modifier.height(28.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                GlassStatCard(
-                    label = "آپلود",
-                    value = uploadSpeedBytesPerSec.toSpeedString(),
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                GlassStatCard(
-                    label = "دانلود",
-                    value = downloadSpeedBytesPerSec.toSpeedString(),
-                    modifier = Modifier.weight(1f)
+            Box(
+                modifier = Modifier
+                    .size(174.dp)
+                    .clip(CircleShape)
+                    .background(Brush.radialGradient(orbColors))
+                    .border(1.dp, Color.White.copy(alpha = 0.42f), CircleShape)
+                    .clickable { onAction(MainAction.ToggleService) },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = if (isRunning) painterResource(R.drawable.ic_stop_24dp)
+                    else painterResource(R.drawable.ic_play_24dp),
+                    contentDescription = if (isRunning) "Disconnect VPN" else "Connect VPN",
+                    tint = Color.White,
+                    modifier = Modifier.size(54.dp)
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            GlassStatCard(
-                label = "سرور متصل",
-                value = connectedServerName.ifBlank { "—" },
-                modifier = Modifier.fillMaxWidth()
+        }
+        Spacer(modifier = Modifier.height(22.dp))
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50.dp))
+                .background(if (isRunning) Color(0xFF1E806F).copy(alpha = 0.18f) else Color.White.copy(alpha = 0.06f))
+                .border(1.dp, (if (isRunning) Color(0xFF4EE0BB) else Color(0xFF8FB8F3)).copy(alpha = 0.32f), RoundedCornerShape(50.dp))
+                .padding(horizontal = 16.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(7.dp)
+                    .clip(CircleShape)
+                    .background(if (isRunning) Color(0xFF4EE0BB) else Color(0xFF8FB8F3))
+            )
+            Text(
+                text = displayText,
+                style = MaterialTheme.typography.titleSmall,
+                color = primaryText
             )
         }
+
+        Spacer(modifier = Modifier.height(28.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
+            GlassStatCard(
+                label = "آپلود",
+                value = uploadSpeedBytesPerSec.toSpeedString(),
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            GlassStatCard(
+                label = "دانلود",
+                value = downloadSpeedBytesPerSec.toSpeedString(),
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        GlassStatCard(
+            label = if (isRunning) "سرور متصل" else "سرور انتخاب‌شده",
+            value = connectedServerName.ifBlank { "برای شروع، یک سرور انتخاب کن" },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

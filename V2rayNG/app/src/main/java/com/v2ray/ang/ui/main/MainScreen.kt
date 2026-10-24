@@ -25,8 +25,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.v2ray.ang.R
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.ui.compose.LocalDarkTheme
 import com.v2ray.ang.ui.compose.QRCodeDialog
@@ -161,6 +163,14 @@ fun MainScreen(
             contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
             topBar = {
                 MainTopBar(
+                    title = stringResource(
+                        when (selectedTab) {
+                            MainTab.Home -> R.string.title_home
+                            MainTab.Servers -> R.string.title_server
+                            MainTab.Tools -> R.string.title_tools
+                            MainTab.Settings -> R.string.title_settings
+                        }
+                    ),
                     isLoading = isLoading,
                     showSearch = showSearch,
                     searchQuery = searchQuery,
