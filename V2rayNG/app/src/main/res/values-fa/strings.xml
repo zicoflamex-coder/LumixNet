@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Lumix VPN</string>
+    <string name="app_name" translatable="false">LumixVPN</string>
     <string name="app_widget_name">تعویض</string>
     <string name="app_tile_name">تعویض</string>
     <string name="app_tile_first_use">برای اولین استفاده از این قابلیت، لطفاً ابتدا از داخل برنامه یک سرور اضافه کنید</string>
@@ -24,7 +24,7 @@
     <string name="toast_services_failure">شروع سرویس با شکست مواجه شد</string>
 
     <!--ServerActivity-->
-    <string name="title_server">فایل کانفیگ</string>
+    <string name="title_server">سرورها</string>
     <string name="menu_item_add_config">افزودن کانفیگ</string>
     <string name="menu_item_save_config">ذخیره کانفیگ</string>
     <string name="menu_item_edit_config">ویرایش کردن کانفیگ</string>
