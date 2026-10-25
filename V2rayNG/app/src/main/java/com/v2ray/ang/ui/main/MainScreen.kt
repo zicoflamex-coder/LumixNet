@@ -225,6 +225,7 @@ fun MainScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
+                    ServersTabHeader(serverCount = groups.size)
                     if (groups.size > 1) {
                         GroupTabBar(
                             groups = groups,
@@ -243,7 +244,7 @@ fun MainScreen(
 
                     HorizontalPager(
                         state = pagerState,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.weight(1f),
                         userScrollEnabled = true,
                         beyondViewportPageCount = 1,
                         key = { page -> groups.getOrNull(page)?.id ?: "group-page-$page" }
@@ -276,7 +277,12 @@ fun MainScreen(
                             )
                         )
                     }
-                }    
+                }
+                } else {
+                    EmptyServersState(
+                        onImportAction = onAction,
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
