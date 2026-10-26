@@ -73,6 +73,7 @@ fun MainTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(top = statusBarHeight)
             .padding(horizontal = 12.dp, vertical = 7.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(Brush.verticalGradient(listOf(Color(0xE6294C79), Color(0xF20B1930))))
@@ -81,7 +82,10 @@ fun MainTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
-        IconButton(onClick = if (showSearch) onSearchClose else onMenuClick) {
+        IconButton(
+            onClick = if (showSearch) onSearchClose else onMenuClick,
+            modifier = Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.055f))
+        ) {
             Icon(
                 painter = painterResource(if (showSearch) R.drawable.ic_arrow_back_24dp else R.drawable.ic_menu_24dp),
                 contentDescription = stringResource(if (showSearch) R.string.acc_back else R.string.acc_open_menu),
@@ -132,19 +136,20 @@ fun MainTopBar(
                     }
                 }
             }
-            IconButton(onClick = { onSearchToggle(true) }) {
+            IconButton(onClick = { onSearchToggle(true) }, modifier = Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.055f))) {
                 Icon(painterResource(R.drawable.ic_search_24dp), contentDescription = stringResource(R.string.acc_search), tint = ink)
             }
         }
         Box {
-            IconButton(onClick = { showImportMenu = true }) {
+            IconButton(onClick = { showImportMenu = true }, modifier = Modifier.clip(CircleShape).background(Color(0xFF4D9DFF).copy(alpha = 0.13f))) {
                 Icon(painterResource(R.drawable.ic_add_24dp), contentDescription = stringResource(R.string.acc_add), tint = Color(0xFF8CCBFF))
             }
             DropdownMenu(
                 expanded = showImportMenu,
                 onDismissRequest = { showImportMenu = false },
                 scrollState = importMenuScrollState,
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = Color(0xFF10213D),
+                shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.heightIn(max = maxMenuHeight).verticalScrollbar(importMenuScrollState)
             ) {
                 ImportMenuContent(onAction = { action ->
@@ -154,14 +159,15 @@ fun MainTopBar(
             }
         }
         Box {
-            IconButton(onClick = { showMenu = true }) {
+            IconButton(onClick = { showMenu = true }, modifier = Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.055f))) {
                 Icon(painterResource(R.drawable.ic_more_vert_24dp), contentDescription = stringResource(R.string.acc_more), tint = ink)
             }
             DropdownMenu(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false },
                 scrollState = moreMenuScrollState,
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = Color(0xFF10213D),
+                shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.heightIn(max = maxMenuHeight).verticalScrollbar(moreMenuScrollState)
             ) {
                 MoreMenuContent { action ->

@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -102,8 +103,46 @@ fun HomeTabContent(
             GlassStatCard("آپلود", uploadSpeedBytesPerSec.toSpeedString(), Modifier.weight(1f))
             GlassStatCard("دانلود", downloadSpeedBytesPerSec.toSpeedString(), Modifier.weight(1f))
         }
+        Spacer(Modifier.height(10.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            QuickActionChip(
+                title = "بروزرسانی اشتراک",
+                iconRes = R.drawable.ic_lumix_refresh_24,
+                modifier = Modifier.weight(1f),
+                onClick = { onAction(MainAction.UpdateSubscriptions) }
+            )
+            QuickActionChip(
+                title = "تست پینگ واقعی",
+                iconRes = R.drawable.ic_lumix_ping_24,
+                modifier = Modifier.weight(1f),
+                onClick = { onAction(MainAction.TestRealAllServers) }
+            )
+        }
         Spacer(Modifier.height(12.dp))
         GlassStatCard(if (isRunning) "سرور متصل" else "سرور انتخاب‌شده", connectedServerName.ifBlank { "برای شروع، یک سرور انتخاب کن" }, Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+private fun QuickActionChip(
+    title: String,
+    iconRes: Int,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(15.dp))
+            .background(Brush.horizontalGradient(listOf(Color(0xFF183B69), Color(0xFF10213D))))
+            .border(1.dp, LumixStroke, RoundedCornerShape(15.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 11.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(painterResource(iconRes), contentDescription = title, tint = LumixBlue, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(7.dp))
+        Text(title, color = Color(0xFFF3F7FF), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
     }
 }
 
@@ -207,7 +246,7 @@ fun EmptyServersState(
 }
 
 @Composable
-fun ServersTabHeader(serverCount: Int) {
+fun ServersTabHeader(serverCount: Int, onUpdateSubscriptions: () -> Unit, onTestRealPing: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 12.dp)
             .clip(RoundedCornerShape(22.dp))
@@ -220,6 +259,11 @@ fun ServersTabHeader(serverCount: Int) {
         Text("سرورهای تو", color = Color(0xFFF3F7FF), fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(4.dp))
         Text("$serverCount گروه سرور · برای انتخاب، یکی از کانفیگ‌ها را لمس کن", color = LumixMuted, fontSize = 11.sp)
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+            QuickActionChip("بروزرسانی اشتراک", R.drawable.ic_lumix_refresh_24, Modifier.weight(1f), onUpdateSubscriptions)
+            QuickActionChip("تست پینگ واقعی", R.drawable.ic_lumix_ping_24, Modifier.weight(1f), onTestRealPing)
+        }
     }
 }
 
@@ -229,30 +273,14 @@ fun ToolsTabContent(
     onMoreMenuAction: (MainMoreMenuAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        item {
-            SectionIntro("مرکز ابزارهای Lumix", "ورود کانفیگ و مدیریت اتصال، همه در یک فضای اختصاصی.", "LUMIX WORKSPACE")
-        }
-        item {
-            Text("افزودن کانفیگ", color = LumixBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 22.dp, top = 12.dp, bottom = 5.dp))
-        }
-        item { GlassActionRow("اسکن کد QR", "با دوربین گوشی کانفیگ را وارد کن", R.drawable.ic_add_24dp) { onImportAction(MainAction.ImportQRcode) } }
-        item { GlassActionRow("از کلیپ‌بورد", "لینک یا متن کانفیگ کپی‌شده را وارد کن", R.drawable.ic_copy) { onImportAction(MainAction.ImportClipboard) } }
-        item { GlassActionRow("از فایل گوشی", "فایل کانفیگ ذخیره‌شده را انتخاب کن", R.drawable.ic_file_24dp) { onImportAction(MainAction.ImportConfigLocal) } }
-        item {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 12.dp)
-                .clip(RoundedCornerShape(20.dp)).background(Brush.linearGradient(listOf(Color(0xFF173A68), Color(0xFF101D34))))
-                .border(1.dp, LumixStroke, RoundedCornerShape(20.dp)).padding(16.dp)) {
-                Text("مدیریت و نگهداری", color = Color(0xFFF3F7FF), fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(4.dp))
-                Text("ابزارهای گروهی برای مرتب‌سازی، بررسی و نگهداری کانفیگ‌ها", color = LumixMuted, fontSize = 11.sp)
-            }
-        }
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        item { SectionIntro("ابزارهای اتصال", "واردکردن کانفیگ و مدیریت سرورها را از این بخش انجام بده.", "LUMIX TOOLS") }
+        item { GlassActionRow(stringResource(R.string.menu_item_import_config_qrcode), "اسکن کد QR برای افزودن پیکربندی", R.drawable.ic_add_24dp) { onImportAction(MainAction.ImportQRcode) } }
+        item { GlassActionRow(stringResource(R.string.menu_item_import_config_clipboard), "خواندن لینک یا کانفیگ کپی‌شده", R.drawable.ic_copy) { onImportAction(MainAction.ImportClipboard) } }
+        item { GlassActionRow(stringResource(R.string.menu_item_import_config_local), "واردکردن فایل پیکربندی از گوشی", R.drawable.ic_file_24dp) { onImportAction(MainAction.ImportConfigLocal) } }
+        item { Spacer(Modifier.height(13.dp)); Text("مدیریت پیشرفته", color = LumixBlue, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 22.dp, vertical = 8.dp)) }
         items(MainMoreMenuAction.entries) { action ->
-            GlassActionRow(stringResource(action.labelRes), "اجرای عملیات روی کانفیگ‌ها و گروه فعلی", R.drawable.ic_settings_24dp) {
-                onMoreMenuAction(action)
-            }
+            GlassActionRow(stringResource(action.labelRes), "عملیات مدیریت و نگهداری پیکربندی‌ها", R.drawable.ic_settings_24dp) { onMoreMenuAction(action) }
         }
         item { Spacer(Modifier.height(100.dp)) }
     }
@@ -264,36 +292,19 @@ fun SettingsTabContent(
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { SectionIntro("فضای تنظیمات", "کنترل دقیق رفتار و اتصال LumixVPN در یک محیط یکپارچه.", "LUMIX CONTROL") }
-        item {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp)
-                .clip(RoundedCornerShape(22.dp))
-                .background(Brush.linearGradient(listOf(Color(0xFF1A3D6B), Color(0xFF101C31))))
-                .border(1.dp, Color(0xFF8BC5FF).copy(alpha = .23f), RoundedCornerShape(22.dp))
-                .padding(16.dp)) {
-                Text("تنظیمات برنامه", color = Color(0xFFF3F7FF), fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(5.dp))
-                Text("هر بخش را برای باز کردن تنظیمات مربوطه انتخاب کن.", color = LumixMuted, fontSize = 12.sp)
-            }
-        }
+        item { SectionIntro("تنظیمات برنامه", "LumixVPN را مطابق نیاز خود مدیریت کن.", "PERSONALIZE") }
         items(MainDestination.entries) { destination ->
-            GlassActionRow(
-                title = stringResource(destination.labelRes),
-                subtitle = "بازکردن گزینه‌ها و کنترل‌های این بخش",
-                iconRes = R.drawable.ic_settings_24dp,
-                onClick = { onNavigate(destination) }
-            )
+            GlassActionRow(stringResource(destination.labelRes), "تنظیمات و گزینه‌های مربوط به این بخش", R.drawable.ic_settings_24dp) { onNavigate(destination) }
         }
         item {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 14.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF17345A).copy(alpha = .45f))
-                    .border(1.dp, LumixStroke, RoundedCornerShape(20.dp)).padding(16.dp)
+                    .clip(RoundedCornerShape(18.dp)).background(Color(0xFF17345A).copy(alpha = .45f))
+                    .border(1.dp, LumixStroke, RoundedCornerShape(18.dp)).padding(16.dp)
             ) {
                 Text("LumixVPN", color = Color(0xFFF3F7FF), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                 Spacer(Modifier.height(5.dp))
-                Text("اتصال خصوصی، با طراحی اختصاصی آبی و شیشه‌ای", color = LumixMuted, fontSize = 11.sp)
+                Text("طراحی اختصاصی با تم آبی و شیشه‌ای", color = LumixMuted, fontSize = 11.sp)
             }
         }
         item { Spacer(Modifier.height(100.dp)) }

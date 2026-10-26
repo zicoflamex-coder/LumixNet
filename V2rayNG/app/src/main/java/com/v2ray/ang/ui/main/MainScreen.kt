@@ -225,7 +225,11 @@ fun MainScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
-                    ServersTabHeader(serverCount = groups.size)
+                    ServersTabHeader(
+                        serverCount = groups.size,
+                        onUpdateSubscriptions = { onAction(MainAction.UpdateSubscriptions) },
+                        onTestRealPing = { onAction(MainAction.TestRealAllServers) }
+                    )
                     if (groups.size > 1) {
                         GroupTabBar(
                             groups = groups,
