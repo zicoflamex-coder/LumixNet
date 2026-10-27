@@ -23,6 +23,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,7 +68,7 @@ fun HomeTabContent(
     ) {
         Text("LUMIXVPN", style = MaterialTheme.typography.headlineSmall, color = primaryText, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp)
         Spacer(Modifier.height(5.dp))
-        Text("Private connection, simplified", style = MaterialTheme.typography.bodyMedium, color = secondaryText)
+        Text(stringResource(R.string.lumix_tagline), style = MaterialTheme.typography.bodyMedium, color = secondaryText)
         Spacer(Modifier.height(30.dp))
         Box(
             modifier = Modifier.size(204.dp).clip(CircleShape)
@@ -82,7 +84,7 @@ fun HomeTabContent(
             ) {
                 Icon(
                     painter = if (isRunning) painterResource(R.drawable.ic_stop_24dp) else painterResource(R.drawable.ic_play_24dp),
-                    contentDescription = if (isRunning) "Disconnect VPN" else "Connect VPN",
+                    contentDescription = stringResource(if (isRunning) R.string.lumix_disconnect_vpn else R.string.lumix_connect_vpn),
                     tint = Color.White, modifier = Modifier.size(54.dp)
                 )
             }
@@ -100,26 +102,26 @@ fun HomeTabContent(
         }
         Spacer(Modifier.height(28.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            GlassStatCard("آپلود", uploadSpeedBytesPerSec.toSpeedString(), Modifier.weight(1f))
-            GlassStatCard("دانلود", downloadSpeedBytesPerSec.toSpeedString(), Modifier.weight(1f))
+            GlassStatCard(stringResource(R.string.lumix_upload), uploadSpeedBytesPerSec.toSpeedString(), Modifier.weight(1f))
+            GlassStatCard(stringResource(R.string.lumix_download), downloadSpeedBytesPerSec.toSpeedString(), Modifier.weight(1f))
         }
         Spacer(Modifier.height(10.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             QuickActionChip(
-                title = "بروزرسانی اشتراک",
+                title = stringResource(R.string.lumix_refresh_subscription),
                 iconRes = R.drawable.ic_lumix_refresh_24,
                 modifier = Modifier.weight(1f),
                 onClick = { onAction(MainAction.UpdateSubscriptions) }
             )
             QuickActionChip(
-                title = "تست پینگ واقعی",
+                title = stringResource(R.string.lumix_real_ping),
                 iconRes = R.drawable.ic_lumix_ping_24,
                 modifier = Modifier.weight(1f),
                 onClick = { onAction(MainAction.TestRealAllServers) }
             )
         }
         Spacer(Modifier.height(12.dp))
-        GlassStatCard(if (isRunning) "سرور متصل" else "سرور انتخاب‌شده", connectedServerName.ifBlank { "برای شروع، یک سرور انتخاب کن" }, Modifier.fillMaxWidth())
+        GlassStatCard(stringResource(if (isRunning) R.string.lumix_connected_server else R.string.lumix_selected_server), connectedServerName.ifBlank { stringResource(R.string.lumix_select_server_hint) }, Modifier.fillMaxWidth())
     }
 }
 
@@ -227,19 +229,19 @@ fun EmptyServersState(
                 tint = Color(0xFF8CCBFF), modifier = Modifier.size(38.dp))
         }
         Spacer(Modifier.height(20.dp))
-        Text("هنوز سروری اضافه نشده", color = MaterialTheme.colorScheme.onBackground,
+        Text(stringResource(R.string.lumix_empty_servers), color = MaterialTheme.colorScheme.onBackground,
             fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(8.dp))
-        Text("برای شروع، یک کانفیگ از QR، کلیپ‌بورد یا فایل وارد کن.",
+        Text(stringResource(R.string.lumix_empty_servers_desc),
             color = LumixMuted, fontSize = 13.sp, lineHeight = 20.sp)
         Spacer(Modifier.height(22.dp))
-        GlassActionRow("واردکردن از کلیپ‌بورد", "افزودن لینک کپی‌شده", R.drawable.ic_copy) {
+        GlassActionRow(stringResource(R.string.lumix_import_clipboard), stringResource(R.string.lumix_import_clipboard_desc), R.drawable.ic_copy) {
             onImportAction(MainAction.ImportClipboard)
         }
-        GlassActionRow("واردکردن از فایل", "انتخاب فایل کانفیگ از گوشی", R.drawable.ic_file_24dp) {
+        GlassActionRow(stringResource(R.string.lumix_import_file), stringResource(R.string.lumix_import_file_desc), R.drawable.ic_file_24dp) {
             onImportAction(MainAction.ImportConfigLocal)
         }
-        GlassActionRow("اسکن کد QR", "افزودن کانفیگ با دوربین", R.drawable.ic_add_24dp) {
+        GlassActionRow(stringResource(R.string.lumix_scan_qr), stringResource(R.string.lumix_scan_qr_short_desc), R.drawable.ic_add_24dp) {
             onImportAction(MainAction.ImportQRcode)
         }
     }
@@ -254,15 +256,15 @@ fun ServersTabHeader(serverCount: Int, onUpdateSubscriptions: () -> Unit, onTest
             .border(1.dp, Color(0xFF75B9FF).copy(alpha = .22f), RoundedCornerShape(22.dp))
             .padding(17.dp)
     ) {
-        Text("LUMIX NETWORK", color = LumixBlue, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+        Text(stringResource(R.string.lumix_network), color = LumixBlue, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
         Spacer(Modifier.height(7.dp))
-        Text("سرورهای تو", color = Color(0xFFF3F7FF), fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+        Text(stringResource(R.string.lumix_server_header), color = Color(0xFFF3F7FF), fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(4.dp))
-        Text("$serverCount گروه سرور · برای انتخاب، یکی از کانفیگ‌ها را لمس کن", color = LumixMuted, fontSize = 11.sp)
+        Text(stringResource(R.string.lumix_server_header_desc, serverCount), color = LumixMuted, fontSize = 11.sp)
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-            QuickActionChip("بروزرسانی اشتراک", R.drawable.ic_lumix_refresh_24, Modifier.weight(1f), onUpdateSubscriptions)
-            QuickActionChip("تست پینگ واقعی", R.drawable.ic_lumix_ping_24, Modifier.weight(1f), onTestRealPing)
+            QuickActionChip(stringResource(R.string.lumix_refresh_subscription), R.drawable.ic_lumix_refresh_24, Modifier.weight(1f), onUpdateSubscriptions)
+            QuickActionChip(stringResource(R.string.lumix_real_ping), R.drawable.ic_lumix_ping_24, Modifier.weight(1f), onTestRealPing)
         }
     }
 }
@@ -273,14 +275,26 @@ fun ToolsTabContent(
     onMoreMenuAction: (MainMoreMenuAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var protocolsExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var maintenanceExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { SectionIntro("ابزارهای اتصال", "واردکردن کانفیگ و مدیریت سرورها را از این بخش انجام بده.", "LUMIX TOOLS") }
-        item { GlassActionRow(stringResource(R.string.menu_item_import_config_qrcode), "اسکن کد QR برای افزودن پیکربندی", R.drawable.ic_add_24dp) { onImportAction(MainAction.ImportQRcode) } }
-        item { GlassActionRow(stringResource(R.string.menu_item_import_config_clipboard), "خواندن لینک یا کانفیگ کپی‌شده", R.drawable.ic_copy) { onImportAction(MainAction.ImportClipboard) } }
-        item { GlassActionRow(stringResource(R.string.menu_item_import_config_local), "واردکردن فایل پیکربندی از گوشی", R.drawable.ic_file_24dp) { onImportAction(MainAction.ImportConfigLocal) } }
-        item { Spacer(Modifier.height(13.dp)); Text("مدیریت پیشرفته", color = LumixBlue, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 22.dp, vertical = 8.dp)) }
-        items(MainMoreMenuAction.entries) { action ->
-            GlassActionRow(stringResource(action.labelRes), "عملیات مدیریت و نگهداری پیکربندی‌ها", R.drawable.ic_settings_24dp) { onMoreMenuAction(action) }
+        item { SectionIntro(stringResource(R.string.lumix_tools_title), stringResource(R.string.lumix_tools_desc), stringResource(R.string.lumix_tools_tag)) }
+        item { GlassActionRow(stringResource(R.string.menu_item_import_config_qrcode), stringResource(R.string.lumix_scan_qr_desc), R.drawable.ic_add_24dp) { onImportAction(MainAction.ImportQRcode) } }
+        item { GlassActionRow(stringResource(R.string.menu_item_import_config_clipboard), stringResource(R.string.lumix_clipboard_desc), R.drawable.ic_copy) { onImportAction(MainAction.ImportClipboard) } }
+        item { GlassActionRow(stringResource(R.string.menu_item_import_config_local), stringResource(R.string.lumix_local_file_desc), R.drawable.ic_file_24dp) { onImportAction(MainAction.ImportConfigLocal) } }
+        item {
+            GlassActionRow(if (protocolsExpanded) "− ${stringResource(R.string.lumix_protocols_collapse)}" else "+ ${stringResource(R.string.lumix_protocols_expand)}", stringResource(R.string.lumix_protocols_desc), R.drawable.ic_add_24dp) { protocolsExpanded = !protocolsExpanded }
+        }
+        if (protocolsExpanded) {
+            items(ImportMenuAction.entries.drop(3)) { action ->
+                GlassActionRow(stringResource(action.labelRes), stringResource(R.string.lumix_add_config_method), R.drawable.ic_add_24dp) { onImportAction(action.action) }
+            }
+        }
+        item { GlassActionRow(if (maintenanceExpanded) "− ${stringResource(R.string.lumix_management_collapse)}" else "+ ${stringResource(R.string.lumix_management_expand)}", stringResource(R.string.lumix_management_desc), R.drawable.ic_settings_24dp) { maintenanceExpanded = !maintenanceExpanded } }
+        if (maintenanceExpanded) {
+            items(MainMoreMenuAction.entries.filter { it !in listOf(MainMoreMenuAction.RestartService, MainMoreMenuAction.ExportAll, MainMoreMenuAction.TestAllRealPing, MainMoreMenuAction.UpdateSubscriptions) }) { action ->
+                GlassActionRow(stringResource(action.labelRes), stringResource(R.string.lumix_manage_config_desc), R.drawable.ic_settings_24dp) { onMoreMenuAction(action) }
+            }
         }
         item { Spacer(Modifier.height(100.dp)) }
     }
@@ -292,9 +306,9 @@ fun SettingsTabContent(
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { SectionIntro("تنظیمات برنامه", "LumixVPN را مطابق نیاز خود مدیریت کن.", "PERSONALIZE") }
+        item { SectionIntro(stringResource(R.string.lumix_settings_title), stringResource(R.string.lumix_settings_desc), stringResource(R.string.lumix_personalize)) }
         items(MainDestination.entries) { destination ->
-            GlassActionRow(stringResource(destination.labelRes), "تنظیمات و گزینه‌های مربوط به این بخش", R.drawable.ic_settings_24dp) { onNavigate(destination) }
+            GlassActionRow(stringResource(destination.labelRes), stringResource(R.string.lumix_setting_item_desc), R.drawable.ic_settings_24dp) { onNavigate(destination) }
         }
         item {
             Column(
@@ -304,7 +318,7 @@ fun SettingsTabContent(
             ) {
                 Text("LumixVPN", color = Color(0xFFF3F7FF), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                 Spacer(Modifier.height(5.dp))
-                Text("طراحی اختصاصی با تم آبی و شیشه‌ای", color = LumixMuted, fontSize = 11.sp)
+                Text(stringResource(R.string.lumix_glass_theme), color = LumixMuted, fontSize = 11.sp)
             }
         }
         item { Spacer(Modifier.height(100.dp)) }

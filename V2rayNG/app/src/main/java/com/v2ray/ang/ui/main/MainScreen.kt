@@ -225,11 +225,18 @@ fun MainScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
-                    ServersTabHeader(
-                        serverCount = groups.size,
-                        onUpdateSubscriptions = { onAction(MainAction.UpdateSubscriptions) },
-                        onTestRealPing = { onAction(MainAction.TestRealAllServers) }
-                    )
+                    val activeGroupId = groups.getOrNull(pagerState.currentPage)?.id
+                    val activeListState = activeGroupId?.let { lazyListStates[it] }
+                    val activeGridState = activeGroupId?.let { lazyGridStates[it] }
+                    val showServersHeader = (activeListState == null || (activeListState.firstVisibleItemIndex == 0 && activeListState.firstVisibleItemScrollOffset < 24)) &&
+                        (activeGridState == null || (activeGridState.firstVisibleItemIndex == 0 && activeGridState.firstVisibleItemScrollOffset < 24))
+                    if (showServersHeader) {
+                        ServersTabHeader(
+                            serverCount = groups.size,
+                            onUpdateSubscriptions = { onAction(MainAction.UpdateSubscriptions) },
+                            onTestRealPing = { onAction(MainAction.TestRealAllServers) }
+                        )
+                    }
                     if (groups.size > 1) {
                         GroupTabBar(
                             groups = groups,

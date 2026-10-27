@@ -74,7 +74,7 @@ fun MainTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = statusBarHeight)
-            .padding(horizontal = 12.dp, vertical = 7.dp)
+            .padding(start = 12.dp, end = 12.dp, top = statusBarHeight + 4.dp, bottom = 7.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(Brush.verticalGradient(listOf(Color(0xE6294C79), Color(0xF20B1930))))
             .border(1.dp, Color(0xFF9CCBFF).copy(alpha = 0.22f), RoundedCornerShape(22.dp))

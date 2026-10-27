@@ -10,7 +10,7 @@ import com.v2ray.ang.extension.isComplexType
 import com.v2ray.ang.ui.compose.AppDropdownMenuItems
 import com.v2ray.ang.ui.compose.SelectListDialog
 
-private enum class ImportMenuAction(@StringRes val labelRes: Int, val action: MainAction) {
+internal enum class ImportMenuAction(@StringRes val labelRes: Int, val action: MainAction) {
     QRCode(R.string.menu_item_import_config_qrcode, MainAction.ImportQRcode),
     Clipboard(R.string.menu_item_import_config_clipboard, MainAction.ImportClipboard),
     LocalFile(R.string.menu_item_import_config_local, MainAction.ImportConfigLocal),
@@ -60,14 +60,14 @@ internal fun serverMenuActions(
 
 @Composable
 fun ImportMenuContent(onAction: (MainAction) -> Unit) = AppDropdownMenuItems(
-    items = ImportMenuAction.entries,
+    items = ImportMenuAction.entries.take(3),
     labelRes = { it.labelRes },
     onSelected = { onAction(it.action) }
 )
 
 @Composable
 fun MoreMenuContent(onSelected: (MainMoreMenuAction) -> Unit) = AppDropdownMenuItems(
-    items = MainMoreMenuAction.entries,
+    items = listOf(MainMoreMenuAction.RestartService, MainMoreMenuAction.ExportAll, MainMoreMenuAction.TestAllRealPing, MainMoreMenuAction.UpdateSubscriptions),
     labelRes = { it.labelRes },
     onSelected = onSelected
 )
