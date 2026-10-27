@@ -553,4 +553,51 @@
     <string name="connection_test_empty_message">no details available</string>
     <string name="value_unknown">unknown</string>
 
+
+    <!-- LumixVPN UI strings -->
+    <string name="lumix_tagline">Private connection, simplified</string>
+    <string name="lumix_upload">Upload</string>
+    <string name="lumix_download">Download</string>
+    <string name="lumix_refresh_subscription">Refresh subscription</string>
+    <string name="lumix_real_ping">Real ping test</string>
+    <string name="lumix_connected_server">Connected server</string>
+    <string name="lumix_selected_server">Selected server</string>
+    <string name="lumix_select_server_hint">Select a server to get started</string>
+    <string name="lumix_server_header">Your servers</string>
+    <string name="lumix_server_header_desc">%1$d server groups · select a configuration</string>
+    <string name="lumix_tools_title">Connection tools</string>
+    <string name="lumix_tools_desc">Import configurations and manage servers from here.</string>
+    <string name="lumix_tools_tag">LUMIX TOOLS</string>
+    <string name="lumix_scan_qr_desc">Scan a QR code to add a configuration</string>
+    <string name="lumix_clipboard_desc">Read a copied link or configuration</string>
+    <string name="lumix_local_file_desc">Import a configuration file from your phone</string>
+    <string name="lumix_add_protocols">Add protocols manually</string>
+    <string name="lumix_protocols_desc">VMess, VLESS, Trojan, WireGuard and more</string>
+    <string name="lumix_add_config_method">Add a configuration using this method</string>
+    <string name="lumix_management_tools">Management tools</string>
+    <string name="lumix_management_desc">Less-used operations and configuration maintenance</string>
+    <string name="lumix_manage_config_desc">Configuration management and maintenance</string>
+    <string name="lumix_settings_title">App settings</string>
+    <string name="lumix_settings_desc">Customize LumixVPN to suit your needs.</string>
+    <string name="lumix_personalize">PERSONALIZE</string>
+    <string name="lumix_setting_item_desc">Options and settings for this section</string>
+    <string name="lumix_glass_theme">Custom blue glass design</string>
+    <string name="lumix_empty_servers">No servers added yet</string>
+    <string name="lumix_empty_servers_desc">Import a configuration from QR, clipboard or a local file to begin.</string>
+    <string name="lumix_import_clipboard">Import from clipboard</string>
+    <string name="lumix_import_clipboard_desc">Add a copied link</string>
+    <string name="lumix_import_file">Import from file</string>
+    <string name="lumix_import_file_desc">Choose a configuration file from your phone</string>
+    <string name="lumix_scan_qr">Scan QR code</string>
+    <string name="lumix_scan_qr_short_desc">Add a configuration using the camera</string>
+    <string name="lumix_advanced_protocols_menu">Advanced protocols</string>
+
+    <!-- Additional LumixVPN accessibility and menu labels -->
+    <string name="lumix_connect_vpn">Connect VPN</string>
+    <string name="lumix_disconnect_vpn">Disconnect VPN</string>
+    <string name="lumix_network">LUMIX NETWORK</string>
+    <string name="lumix_protocols_expand">Show manual protocols</string>
+    <string name="lumix_protocols_collapse">Hide manual protocols</string>
+    <string name="lumix_management_expand">Show management tools</string>
+    <string name="lumix_management_collapse">Hide management tools</string>
 </resources>
