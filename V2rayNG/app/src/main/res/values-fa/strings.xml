@@ -551,4 +551,51 @@
     <string name="connection_test_empty_message">جزئیاتی در دسترس نیست</string>
     <string name="value_unknown">ناشناخته</string>
 
+
+    <!-- LumixVPN UI strings -->
+    <string name="lumix_tagline">اتصالی خصوصی، ساده و سریع</string>
+    <string name="lumix_upload">آپلود</string>
+    <string name="lumix_download">دانلود</string>
+    <string name="lumix_refresh_subscription">بروزرسانی اشتراک</string>
+    <string name="lumix_real_ping">تست پینگ واقعی</string>
+    <string name="lumix_connected_server">سرور متصل</string>
+    <string name="lumix_selected_server">سرور انتخاب‌شده</string>
+    <string name="lumix_select_server_hint">برای شروع، یک سرور انتخاب کن</string>
+    <string name="lumix_server_header">سرورهای تو</string>
+    <string name="lumix_server_header_desc">%1$d گروه سرور · برای انتخاب، یکی از کانفیگ‌ها را لمس کن</string>
+    <string name="lumix_tools_title">ابزارهای اتصال</string>
+    <string name="lumix_tools_desc">واردکردن کانفیگ و مدیریت سرورها را از این بخش انجام بده.</string>
+    <string name="lumix_tools_tag">ابزارهای لومیکس</string>
+    <string name="lumix_scan_qr_desc">اسکن کد QR برای افزودن پیکربندی</string>
+    <string name="lumix_clipboard_desc">خواندن لینک یا کانفیگ کپی‌شده</string>
+    <string name="lumix_local_file_desc">واردکردن فایل پیکربندی از گوشی</string>
+    <string name="lumix_add_protocols">افزودن دستی پروتکل‌ها</string>
+    <string name="lumix_protocols_desc">VMess، VLESS، Trojan، WireGuard و سایر پروتکل‌ها</string>
+    <string name="lumix_add_config_method">افزودن کانفیگ به روش انتخاب‌شده</string>
+    <string name="lumix_management_tools">ابزارهای مدیریتی</string>
+    <string name="lumix_management_desc">عملیات کم‌استفاده و نگهداری کانفیگ‌ها</string>
+    <string name="lumix_manage_config_desc">عملیات مدیریت و نگهداری پیکربندی‌ها</string>
+    <string name="lumix_settings_title">تنظیمات برنامه</string>
+    <string name="lumix_settings_desc">LumixVPN را مطابق نیاز خود مدیریت کن.</string>
+    <string name="lumix_personalize">شخصی‌سازی</string>
+    <string name="lumix_setting_item_desc">تنظیمات و گزینه‌های مربوط به این بخش</string>
+    <string name="lumix_glass_theme">طراحی اختصاصی با تم آبی و شیشه‌ای</string>
+    <string name="lumix_empty_servers">هنوز سروری اضافه نشده</string>
+    <string name="lumix_empty_servers_desc">برای شروع، یک کانفیگ از QR، کلیپ‌بورد یا فایل وارد کن.</string>
+    <string name="lumix_import_clipboard">واردکردن از کلیپ‌بورد</string>
+    <string name="lumix_import_clipboard_desc">افزودن لینک کپی‌شده</string>
+    <string name="lumix_import_file">واردکردن از فایل</string>
+    <string name="lumix_import_file_desc">انتخاب فایل کانفیگ از گوشی</string>
+    <string name="lumix_scan_qr">اسکن کد QR</string>
+    <string name="lumix_scan_qr_short_desc">افزودن کانفیگ با دوربین</string>
+    <string name="lumix_advanced_protocols_menu">پروتکل‌های پیشرفته</string>
+
+    <!-- Additional LumixVPN accessibility and menu labels -->
+    <string name="lumix_connect_vpn">اتصال به وی‌پی‌ان</string>
+    <string name="lumix_disconnect_vpn">قطع اتصال وی‌پی‌ان</string>
+    <string name="lumix_network">شبکهٔ لومیکس</string>
+    <string name="lumix_protocols_expand">نمایش پروتکل‌های دستی</string>
+    <string name="lumix_protocols_collapse">پنهان‌کردن پروتکل‌های دستی</string>
+    <string name="lumix_management_expand">نمایش ابزارهای مدیریتی</string>
+    <string name="lumix_management_collapse">پنهان‌کردن ابزارهای مدیریتی</string>
 </resources>
