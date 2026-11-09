@@ -47,7 +47,7 @@ fun MainBottomNav(
             listOf(Color(0xF7FFFFFF), Color(0xF0EDF5FF), Color(0xF7E4EEFC))
         }
     )
-    val inactiveTint = if (isDarkTheme) inactiveTint else Color(0xFF627895)
+    val inactiveTint = if (isDarkTheme) Color(0xFFB7C7E2) else Color(0xFF627895)
     val borderTint = if (isDarkTheme) Color.White.copy(alpha = 0.17f) else Color(0xFF7DADE5).copy(alpha = 0.34f)
     val selectedGradient = Brush.verticalGradient(
         colors = listOf(Color(0xFF397FEA), Color(0xFF174B9A))
