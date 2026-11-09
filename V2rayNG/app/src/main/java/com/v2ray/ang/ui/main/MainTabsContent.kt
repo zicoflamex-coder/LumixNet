@@ -321,6 +321,14 @@ fun SettingsTabContent(
                 Text(stringResource(R.string.lumix_glass_theme), color = LumixMuted, fontSize = 11.sp)
             }
         }
+        item {
+            Text(
+                text = "Made by @trippiezico",
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.52f),
+                fontSize = 11.sp,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 8.dp)
+            )
+        }
         item { Spacer(Modifier.height(100.dp)) }
     }
 }
