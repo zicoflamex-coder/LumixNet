@@ -181,7 +181,12 @@ object ThemeManager {
 
 @Composable
 fun resolveDarkTheme(): Boolean {
-    return true
+    val themeMode by ThemeManager.themeMode.collectAsState()
+    return when (themeMode) {
+        "1" -> false
+        "2" -> true
+        else -> isSystemInDarkTheme()
+    }
 }
 val LocalDarkTheme = compositionLocalOf { false }
 
