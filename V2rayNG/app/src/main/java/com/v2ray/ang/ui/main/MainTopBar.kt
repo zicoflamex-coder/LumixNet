@@ -83,7 +83,6 @@ fun MainTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = statusBarHeight)
             .padding(start = 12.dp, end = 12.dp, top = statusBarHeight + 4.dp, bottom = 7.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(topBarBrush)
