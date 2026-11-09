@@ -45,6 +45,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.ui.unit.Dp
 import com.v2ray.ang.R
+import com.v2ray.ang.ui.compose.LocalDarkTheme
 import com.v2ray.ang.ui.compose.verticalScrollbar
 
 @Composable
@@ -67,8 +68,17 @@ fun MainTopBar(
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val navBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val maxMenuHeight: Dp = LocalConfiguration.current.screenHeightDp.dp - statusBarHeight - navBarHeight - 20.dp
-    val ink = Color(0xFFF2F7FF)
-    val muted = Color(0xFF9BB4D9)
+    val isDarkTheme = LocalDarkTheme.current
+    val ink = if (isDarkTheme) Color(0xFFF2F7FF) else Color(0xFF10213D)
+    val muted = if (isDarkTheme) Color(0xFF9BB4D9) else Color(0xFF60738F)
+    val topBarBrush = if (isDarkTheme) {
+        Brush.verticalGradient(listOf(Color(0xE6294C79), Color(0xF20B1930)))
+    } else {
+        Brush.verticalGradient(listOf(Color(0xF7FFFFFF), Color(0xF0EAF3FF)))
+    }
+    val topBarBorder = if (isDarkTheme) Color(0xFF9CCBFF).copy(alpha = 0.22f)
+        else Color(0xFF76A9E8).copy(alpha = 0.32f)
+    val menuSurface = if (isDarkTheme) Color(0xFF10213D) else Color(0xFFF7FAFF)
 
     Row(
         modifier = Modifier
@@ -76,8 +86,8 @@ fun MainTopBar(
             .padding(top = statusBarHeight)
             .padding(start = 12.dp, end = 12.dp, top = statusBarHeight + 4.dp, bottom = 7.dp)
             .clip(RoundedCornerShape(22.dp))
-            .background(Brush.verticalGradient(listOf(Color(0xE6294C79), Color(0xF20B1930))))
-            .border(1.dp, Color(0xFF9CCBFF).copy(alpha = 0.22f), RoundedCornerShape(22.dp))
+            .background(topBarBrush)
+            .border(1.dp, topBarBorder, RoundedCornerShape(22.dp))
             .padding(horizontal = 5.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp)
@@ -141,14 +151,18 @@ fun MainTopBar(
             }
         }
         Box {
-            IconButton(onClick = { showImportMenu = true }, modifier = Modifier.clip(CircleShape).background(Color(0xFF4D9DFF).copy(alpha = 0.13f))) {
-                Icon(painterResource(R.drawable.ic_add_24dp), contentDescription = stringResource(R.string.acc_add), tint = Color(0xFF8CCBFF))
+            IconButton(onClick = { showImportMenu = true }, modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF3477FF).copy(alpha = if (isDarkTheme) 0.24f else 0.13f))
+                    .border(1.dp, Color(0xFF68ADFF).copy(alpha = 0.42f), RoundedCornerShape(14.dp))) {
+                Icon(painterResource(R.drawable.ic_add_24dp), contentDescription = stringResource(R.string.acc_add), tint = if (isDarkTheme) Color(0xFF8CCBFF) else Color(0xFF1769D2))
             }
             DropdownMenu(
                 expanded = showImportMenu,
                 onDismissRequest = { showImportMenu = false },
                 scrollState = importMenuScrollState,
-                containerColor = Color(0xFF10213D),
+                containerColor = menuSurface,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.heightIn(max = maxMenuHeight).verticalScrollbar(importMenuScrollState)
             ) {
@@ -166,7 +180,7 @@ fun MainTopBar(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false },
                 scrollState = moreMenuScrollState,
-                containerColor = Color(0xFF10213D),
+                containerColor = menuSurface,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.heightIn(max = maxMenuHeight).verticalScrollbar(moreMenuScrollState)
             ) {
