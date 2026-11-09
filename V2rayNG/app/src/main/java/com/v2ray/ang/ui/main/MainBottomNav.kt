@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.v2ray.ang.R
+import com.v2ray.ang.ui.compose.LocalDarkTheme
 
 /** Main app navigation. The items keep using the existing app destinations. */
 enum class MainTab(val labelRes: Int, val iconRes: Int) {
@@ -38,13 +39,16 @@ fun MainBottomNav(
     selectedTab: MainTab,
     onTabSelect: (MainTab) -> Unit
 ) {
+    val isDarkTheme = LocalDarkTheme.current
     val glassGradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xE62B5791),
-            Color(0xF20D1D37),
-            Color(0xF70A1428)
-        )
+        colors = if (isDarkTheme) {
+            listOf(Color(0xE62B5791), Color(0xF20D1D37), Color(0xF70A1428))
+        } else {
+            listOf(Color(0xF7FFFFFF), Color(0xF0EDF5FF), Color(0xF7E4EEFC))
+        }
     )
+    val inactiveTint = if (isDarkTheme) inactiveTint else Color(0xFF627895)
+    val borderTint = if (isDarkTheme) Color.White.copy(alpha = 0.17f) else Color(0xFF7DADE5).copy(alpha = 0.34f)
     val selectedGradient = Brush.verticalGradient(
         colors = listOf(Color(0xFF397FEA), Color(0xFF174B9A))
     )
@@ -56,7 +60,7 @@ fun MainBottomNav(
             .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 8.dp)
             .clip(RoundedCornerShape(28.dp))
             .background(glassGradient)
-            .border(1.dp, Color.White.copy(alpha = 0.17f), RoundedCornerShape(28.dp))
+            .border(1.dp, borderTint, RoundedCornerShape(28.dp))
             .padding(horizontal = 7.dp, vertical = 7.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -76,12 +80,12 @@ fun MainBottomNav(
                 Icon(
                     painter = painterResource(tab.iconRes),
                     contentDescription = stringResource(tab.labelRes),
-                    tint = if (selected) Color.White else Color(0xFFB7C7E2),
+                    tint = if (selected) Color.White else inactiveTint,
                     modifier = Modifier.size(22.dp)
                 )
                 Text(
                     text = stringResource(tab.labelRes),
-                    color = if (selected) Color.White else Color(0xFFB7C7E2),
+                    color = if (selected) Color.White else inactiveTint,
                     fontSize = 11.sp,
                     maxLines = 1
                 )
