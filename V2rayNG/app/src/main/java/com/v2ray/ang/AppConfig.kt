@@ -52,6 +52,10 @@ object AppConfig {
     const val SUBSCRIPTION_UPDATE_TASK_NAME = "subscription_updater"
     const val SUBSCRIPTION_MIN_INTERVAL_MINUTES = 15L
     const val PREF_SPEED_ENABLED = "pref_speed_enabled"
+    const val PREF_LUMIX_CONNECT_TS = "pref_lumix_connect_ts"
+    const val PREF_LUMIX_ANIM_MODE = "pref_lumix_anim_mode" // system | full | off
+    const val PREF_LUMIX_HAPTIC = "pref_lumix_haptic"
+    const val LUMIX_SUPPORT_URL = "https://t.me/LumixNetBot"
     const val PREF_CONFIRM_REMOVE = "pref_confirm_remove"
     const val PREF_DOUBLE_COLUMN_DISPLAY = "pref_double_column_display"
     const val PREF_GROUP_ALL_DISPLAY = "pref_group_all_display"
