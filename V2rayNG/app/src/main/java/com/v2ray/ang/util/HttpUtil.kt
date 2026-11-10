@@ -142,6 +142,9 @@ object HttpUtil {
      * @return The content of the URL as a string.
      * @throws IOException If an I/O error occurs.
      */
+    /** Raw Subscription-Userinfo header of the last successful subscription fetch on the calling thread. */
+    val lastSubscriptionUserInfo = ThreadLocal<String?>()
+
     @Throws(IOException::class)
     fun getUrlContentWithUserAgent(request: UrlContentRequest): String {
         var currentUrl = request.url
@@ -193,6 +196,7 @@ object HttpUtil {
                     }
 
                     response.isSuccessful -> {
+                        lastSubscriptionUserInfo.set(response.header("Subscription-Userinfo"))
                         return response.body?.string() ?: ""
                     }
 
