@@ -33,40 +33,40 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 private val LightColor = lightColorScheme(
-    primary = Color(0xFF000000), // Black
-    onPrimary = Color(0xFFFFFFFF), // White
-    primaryContainer = Color(0xFFE0E0E0), // Light Gray
-    onPrimaryContainer = Color(0xFF000000), // Black
-    secondary = Color(0xFFf97910), // Orange
-    onSecondary = Color(0xFFFFFFFF), // White
-    secondaryContainer = Color(0xFFFFE8D6), // Pale Orange
-    onSecondaryContainer = Color(0xFF2B1700), // Dark Brown
-    tertiary = Color(0xFF009966), // Green
-    onTertiary = Color(0xFFFFFFFF), // White
-    tertiaryContainer = Color(0xFFA0F2D0), // Light Green
-    onTertiaryContainer = Color(0xFF00201A), // Dark Teal
-    error = Color(0xFFBA1A1A), // Red
-    errorContainer = Color(0xFFFFDAD6), // Light Red
-    onError = Color(0xFFFFFFFF), // White
-    onErrorContainer = Color(0xFF410002), // Dark Red
-    background = Color(0xFFFFFFFF), // White
-    onBackground = Color(0xFF1C1B1F), // Near Black
-    surface = Color(0xFFFFFFFF), // White
-    onSurface = Color(0xFF1C1B1F), // Near Black
-    surfaceVariant = Color(0xFFE7E0EC), // Light Purple Gray
-    onSurfaceVariant = Color(0xFF49454F), // Dark Gray
-    outline = Color(0xFF79747E), // Medium Gray
-    outlineVariant = Color(0xFFCAC4D0), // Light Gray
-    inverseSurface = Color(0xFF313033), // Dark Gray
-    inverseOnSurface = Color(0xFFF4EFF4), // Very Light Gray
-    inversePrimary = Color(0xFFC0C0C0), // Silver Gray
-    scrim = Color(0xFF000000), // Black
-    surfaceTint = Color(0xFF000000), // Black
-    surfaceContainerLowest = Color(0xFFFFFFFF), // White
-    surfaceContainerLow = Color(0xFFF7F7F7), // Very Light Gray
-    surfaceContainer = Color(0xFFF1F1F1), // Light Gray
-    surfaceContainerHigh = Color(0xFFEBEBEB), // Light Gray
-    surfaceContainerHighest = Color(0xFFE5E5E5), // Light Gray
+    primary = Color(0xFF1E88E5), // Lumix Blue
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFE3F1FF),
+    onPrimaryContainer = Color(0xFF0B3A6B),
+    secondary = Color(0xFF0A6CC8),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFFDCEBFA),
+    onSecondaryContainer = Color(0xFF0B2A4A),
+    tertiary = Color(0xFF00A67E), // Connected Green
+    onTertiary = Color(0xFFFFFFFF),
+    tertiaryContainer = Color(0xFFD3F5EA),
+    onTertiaryContainer = Color(0xFF00382B),
+    error = Color(0xFFD93B4F),
+    errorContainer = Color(0xFFFFDAD6),
+    onError = Color(0xFFFFFFFF),
+    onErrorContainer = Color(0xFF410002),
+    background = Color(0xFFF4F8FF),
+    onBackground = Color(0xFF0E1B2E),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF0E1B2E),
+    surfaceVariant = Color(0xFFE8F0FB),
+    onSurfaceVariant = Color(0xFF5B6B82),
+    outline = Color(0xFF8DA0BA),
+    outlineVariant = Color(0xFFD5E2F3),
+    inverseSurface = Color(0xFF1E2A3C),
+    inverseOnSurface = Color(0xFFF4F8FF),
+    inversePrimary = Color(0xFF8CC4FF),
+    scrim = Color(0xFF000000),
+    surfaceTint = Color(0xFF1E88E5),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF8FBFF),
+    surfaceContainer = Color(0xFFF1F6FD),
+    surfaceContainerHigh = Color(0xFFEBF2FB),
+    surfaceContainerHighest = Color(0xFFE5EEF9),
 )
 
 private val DarkColor = darkColorScheme(
@@ -132,10 +132,10 @@ val LumixTypography = Typography(
     labelSmall = baseTypography.labelSmall.copy(fontFamily = PoppinsFontFamily, fontWeight = FontWeight.Medium)
 )
 // Semantic Colors
-val colorPing = Color(0xFF009966) // Green
+val colorPing = Color(0xFF00A67E) // Green
 val colorPingRed = Color(0xFFFF0099) // Pink Red
-val colorConfigType = Color(0xFFf97910) // Orange
-val colorFabActive = Color(0xFFf97910) // Orange
+val colorConfigType = Color(0xFF1E88E5) // Blue
+val colorFabActive = Color(0xFF1E88E5) // Blue
 val colorFabInactiveLight = Color(0xFF9C9C9C) // Gray
 val colorFabInactiveDark = Color(0xFF646464) // Dark Gray
 val dividerColorLight = Color(0xFFE0E0E0) // Light Gray
@@ -181,7 +181,7 @@ object ThemeManager {
 
 @Composable
 fun resolveDarkTheme(): Boolean {
-    return true
+    return false
 }
 val LocalDarkTheme = compositionLocalOf { false }
 
