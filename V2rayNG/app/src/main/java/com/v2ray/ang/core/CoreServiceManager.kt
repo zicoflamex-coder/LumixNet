@@ -172,6 +172,7 @@ object CoreServiceManager {
         }
 
         if (!isReload) {
+            com.v2ray.ang.handler.MmkvManager.encodeSettings(AppConfig.PREF_LUMIX_CONNECT_TS, System.currentTimeMillis())
             MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
         }
         NotificationManager.startSpeedNotification()
@@ -207,6 +208,7 @@ object CoreServiceManager {
             browserDialer = null
         }
 
+        com.v2ray.ang.handler.MmkvManager.encodeSettings(AppConfig.PREF_LUMIX_CONNECT_TS, 0L)
         MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "")
         NotificationManager.cancelNotification()
 
