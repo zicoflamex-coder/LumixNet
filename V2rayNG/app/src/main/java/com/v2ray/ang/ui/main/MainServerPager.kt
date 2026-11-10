@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.draw.scale
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -181,7 +184,7 @@ private fun ServerListPage(
                         ) { content() }
                     }
                 } else {
-                    content()
+                    Box(if (LocalLumixAnimations.current) Modifier.animateItem() else Modifier) { content() }
                 }
             }
         }
@@ -222,11 +225,13 @@ private fun ServerListPage(
                         }
                     }
                 } else {
-                    ServerItemRow(
-                        row = row,
-                        isSelected = row.guid == selectedGuid,
-                        actions = actions
-                    )
+                    Box(if (LocalLumixAnimations.current) Modifier.animateItem() else Modifier) {
+                        ServerItemRow(
+                            row = row,
+                            isSelected = row.guid == selectedGuid,
+                            actions = actions
+                        )
+                    }
                 }
             }
         }
@@ -311,13 +316,24 @@ private fun ServerListItem(
     } else {
         null
     }
+    val selection by animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0f,
+        animationSpec = lumixTween(LocalLumixAnimations.current, 260),
+        label = "server-selection"
+    )
+    val primary = MaterialTheme.colorScheme.primary
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 5.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.055f))
-            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(16.dp))
+            .scale(1f + 0.012f * selection)
+            .clip(RoundedCornerShape(20.dp))
+            .background(lerp(Color.White, Color(0xFFEAF4FF), selection))
+            .border(
+                (1f + 0.5f * selection).dp,
+                lerp(Color(0xFFD5E2F3), primary, selection),
+                RoundedCornerShape(20.dp)
+            )
             .height(IntrinsicSize.Min)
             .semantics {
                 if (selectedStateDescription != null) {
