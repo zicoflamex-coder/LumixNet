@@ -14,5 +14,8 @@ data class SubscriptionItem(
     var allowInsecureUrl: Boolean = false,
     var userAgent: String? = null,
     var requestHeaders: String? = null,
+    var usedBytes: Long = -1, // from the Subscription-Userinfo header, -1 when the panel does not send it
+    var totalBytes: Long = -1,
+    var expireAtSeconds: Long = -1,
 )
 
