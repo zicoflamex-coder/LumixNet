@@ -488,6 +488,7 @@ object AngConfigManager {
             val proxyUsername = SettingsManager.getSocksUsername()
             val proxyPassword = SettingsManager.getSocksPassword()
 
+            HttpUtil.lastSubscriptionUserInfo.set(null)
             var configText = try {
                 val httpPort = SettingsManager.getHttpPort()
                 HttpUtil.getUrlContentWithUserAgent(
@@ -526,6 +527,7 @@ object AngConfigManager {
             val count = parseConfigViaSub(configText, it.guid, false)
             if (count > 0) {
                 it.subscription.lastUpdated = System.currentTimeMillis()
+                applySubscriptionUserInfo(it.subscription, HttpUtil.lastSubscriptionUserInfo.get())
                 MmkvManager.encodeSubscription(it.guid, it.subscription)
                 LogUtil.i(AppConfig.TAG, "Subscription updated: ${it.subscription.remarks}, $count configs")
                 return SubscriptionUpdateResult(
@@ -539,6 +541,29 @@ object AngConfigManager {
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to update config via subscription", e)
             return SubscriptionUpdateResult(failureCount = 1)
+        }
+    }
+
+    /**
+     * Reads the standard "Subscription-Userinfo" header (upload=..; download=..; total=..; expire=..).
+     * Fields the panel does not send are left as -1 so the UI never shows made-up usage.
+     */
+    private fun applySubscriptionUserInfo(subscription: SubscriptionItem, header: String?) {
+        if (header.isNullOrBlank()) return
+        val values = header.split(";").mapNotNull { part ->
+            val pair = part.trim().split("=", limit = 2)
+            if (pair.size == 2) pair[0].trim().lowercase() to pair[1].trim().toDoubleOrNull() else null
+        }.toMap()
+        val upload = values["upload"] ?: 0.0
+        val download = values["download"] ?: 0.0
+        val total = values["total"]
+        val expire = values["expire"]
+        if (total != null && total > 0) {
+            subscription.totalBytes = total.toLong()
+            subscription.usedBytes = (upload + download).toLong()
+        }
+        if (expire != null && expire > 0) {
+            subscription.expireAtSeconds = expire.toLong()
         }
     }
 
